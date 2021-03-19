@@ -109,10 +109,11 @@
 									<b>Upgrading to Jetson Xavier NX</b>
 									<p>
 										I decided to use a Jetson Xavier NX as a quick solution to the Nano localization problem. 
-										The Xavier NX has a significantly more powerful CPU compared the the Nano.
+										The NX has a significantly more powerful CPU compared the the Nano. 
+										Point clouds moved through the pipeline at 18Hz and the camera was localized at 10Hz. 
+										Given these frequencies, I expected the NX to produce more accurate meshes than the Nano.
 										
 									</p>
-                                    <p>frequency increase, case</p>
                                 
                                 <h2>Results</h2>
                                     <b>Jetson Nano</b>
@@ -120,11 +121,34 @@
                                     <b>Jetson Xavier NX</b>
                                     <p></p>
                                     <b>Laptop</b>
-                                    <p></p>
+									<p></p>
+									
+								<h2>Discussion</h2>
+									<p>The results do not perfectly align with my expectations. 
+										Specifically, I expected the .stl files generated from the NX to be a large improvement from the Nano.
+										I believe I still can produce superior meshes from the NX, however I need to tune the parameters. 
+										The most time consuming aspect of this project was tuning all the parameters involved in the pipeline. 
+										Each new device requires new scanning parameters and new meshing parameters for optimal performance.
+										When I first developed the pipeline, I tuned everything for my laptop.
+										To optimize performance on the Nano, I clipped the distance of the RGB-D camera and slightly increased the point cloud voxelization.
+										The changes propogated through the pipeline, so new meshing parameters were necessary.</p>
+									<b>Primary System Limitations:</b>
+									<p>
+										- Difficulty tuning parameters for various devices<br/>
+										- Difficulty tuning parameters for target objects of various sizes and geometries<br/>
+									</p>
 
 								<h2>Future Work</h2>
-								<p></p>
-                                <h1><a href="https://github.com/ayerun/Robotic_3D_Scanner" target="_blank">-View Full Source Code-</a></h1>
+									<p>
+										An interesting extension to this project, would be to use machine learning to optimize the meshing parameters. 
+										In an ideal system the user would input their hardware specifications and target object specifications.
+										These specifications would directly correlate to scanning parameters.
+										Given scanning parameters and target object specifications, machine learning could be used to optimize the meshing parameters.
+										This would address the primary limitations of my current system.
+									</p>
+
+
+                                <h1><a href="https://github.com/ayerun/3D_Reconstruction" target="_blank">-View Full Source Code-</a></h1>
 							</section>
 					</div>
 
