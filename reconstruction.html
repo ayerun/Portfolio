@@ -79,9 +79,9 @@
 										Using the Point Cloud Library (PCL), I estimated the surface normals and implemented the Greedy Projection Triangulation algorithm to generate a mesh. 
 										My results were disappointing.<br/>
 										insert stl <br/>
-										The point cloud map looked great, and I attemped countless different combinations of meshing parameters with no success.
+										The point cloud map looked great, but I attemped countless different combinations of meshing parameters with no success.
 										This made me believe that the estimation of surface normals was the source of error.
-										I took a step back and utilized the moving least squares algorithm in PCL to smooth the point cloud map prior to estimating surface normals.
+										I took a step back and implemented the moving least squares algorithm in PCL to smooth the point cloud map prior to estimating surface normals.
 										The resulting meshes showed significant improvement.<br/>
 										insert stl<br/>
 									</p>
@@ -92,12 +92,12 @@
 										Considering I was running multiple computationally intensive algorithms using large point clouds, I was hesistant to put the full pipeline on a microcontroller.
 										I decided to stream incoming point clouds over a LAN to my laptop. Then, my laptop could perform of the intense computations.
 										I used ethernet connections throughout the system to optimize the data transfer.
-										With this setup, my laptop was recieved point clouds at 0.1Hz.
+										With this setup, my laptop recieved point clouds at 0.1Hz.
 										SLAM had no hope of localizing the camera at this frequency.
 									</p>
                                     <b>Full Pipeline on Jetson Nano</b>
                                     <p>When running everything on my laptop point clouds messages moved through my system at 20Hz and the camera was localized at 14Hz.
-										The bottleneck of my point cloud streaming system was the ROS publisher subsriber system.
+										The bottleneck of my point cloud streaming system was the ROS publisher/subsriber framework.
 										When transfering pointcloud data between machines, the large point cloud messages needs to be copied.
 										When running everything on one machine, the pipeline can utilize ROS nodelets with shared memory.
 										I decided to put the entire pipeline on the Nano.
@@ -128,7 +128,7 @@
 										Specifically, I expected the .stl files generated from the NX to be a large improvement from the Nano.
 										I believe I still can produce superior meshes from the NX, however I need to tune the parameters. 
 										The most time consuming aspect of this project was tuning all the parameters involved in the pipeline. 
-										Each new device requires new scanning parameters and new meshing parameters for optimal performance.
+										Each new device requires new scanning parameters and new meshing parameters.
 										When I first developed the pipeline, I tuned everything for my laptop.
 										To optimize performance on the Nano, I clipped the distance of the RGB-D camera and slightly increased the point cloud voxelization.
 										The changes propogated through the pipeline, so new meshing parameters were necessary.</p>
