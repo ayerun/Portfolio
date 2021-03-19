@@ -50,7 +50,7 @@
 								<p>Building off a 
 									<a href="3Dscan.html" target="_blank">previous project</a>, 
 									I created a handheld 3D scanner capable of camera localization, continuous pointcloud fusion, and 3D reconstruction.
-									This pipeline was developed on a laptop then ported to a Jetson Nano and Jetson Xavier NX.
+									This pipeline was developed using ROS on a laptop then ported to a Jetson Nano and Jetson Xavier NX.
 									Currently, handheld 3D scanners sell for 
 									<a href="https://www.3dsourced.com/rankings/best-3d-scanner/" target="_blank">$6000 - $20,000</a>. 
 									This is a $400 prototype demonstrating that DIY handheld 3D scanners are feasible with COTS components.
@@ -88,10 +88,30 @@
 
                                 <h2>Porting to Microcontrollers</h2>
                                     <b>Streaming Point Clouds</b>
-                                    <p></p>
+                                    <p>Once the pipeline was functional on my computer, I began porting it to the Jetson Nano to make a handheld 3D scanner.
+										Considering I was running multiple computationally intensive algorithms using large point clouds, I was hesistant to put the full pipeline on a microcontroller.
+										I decided to stream incoming point clouds over a LAN to my laptop. Then, my laptop could perform of the intense computations.
+										I used ethernet connections throughout the system to optimize the data transfer.
+										With this setup, my laptop was recieved point clouds at 0.1Hz.
+										SLAM had no hope of localizing the camera at this frequency.
+									</p>
                                     <b>Full Pipeline on Jetson Nano</b>
-                                    <p></p>
-                                    <b>Upgrading to Jetson Xavier NX</b>
+                                    <p>When running everything on my laptop point clouds messages moved through my system at 20Hz and the camera was localized at 14Hz.
+										The bottleneck of my point cloud streaming system was the ROS publisher subsriber system.
+										When transfering pointcloud data between machines, the large point cloud messages needs to be copied.
+										When running everything on one machine, the pipeline can utilize ROS nodelets with shared memory.
+										I decided to put the entire pipeline on the Nano.
+										Point clouds moved through the pipeline at 16Hz and the camera was localized at 6Hz. 
+										This was enough for the entire pipeline to function, but there was still much room for improvement.
+										In order to scan objects, I had to move the camera incredibly slow otherwise SLAM would be unable to localize the camera.
+										Even if the algorithm regained localization of the camera, the error involved in this process would often ruin the point cloud map.
+									</p>
+									<b>Upgrading to Jetson Xavier NX</b>
+									<p>
+										I decided to use a Jetson Xavier NX as a quick solution to the Nano localization problem. 
+										The Xavier NX has a significantly more powerful CPU compared the the Nano.
+										
+									</p>
                                     <p>frequency increase, case</p>
                                 
                                 <h2>Results</h2>
