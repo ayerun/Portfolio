@@ -60,13 +60,16 @@
 									This pipeline was developed using ROS on a laptop then ported to a Jetson Nano and Jetson Xavier NX.
 									Currently, handheld 3D scanners sell for 
 									<a href="https://www.3dsourced.com/rankings/best-3d-scanner/" target="_blank">$6000 - $20,000</a>. 
-									This is a $400 prototype demonstrating that DIY handheld 3D scanners are feasible with COTS components.
+									This is a $400 prototype demonstrating that DIY handheld 3D scanners are feasible with COTS components. <br/>
+									<b>Note: All .stl files in this page are interative. Users can zoom and rotate 3D models. 
+										If an any .stl file fails to load due they can be downloaded 
+										<a href="https://github.com/ayerun/Portfolio/tree/master/stl" target="_blank">here</a>.</b>
 								</p>
 
 								<h2>Reconstruction Pipeline</h2>
 									 <a href="images/reconstruction_diagram.png" target="_blank"><img class="image fit" src="images/reconstruction_diagram.png" alt="" /></a><br/>
                                     <div class="align center">
-										<p class="image center"><b>Figure 1.</b>LOOK AT MEEEEEEE</p>
+										<p class="image center"><b>Figure 1.</b>Reconstruction pipeline flowchart. Point clouds are collected to form a map. Then reconstructed into an .stl file.</p>
 									</div>
                                     <b>Point Cloud Fusion</b>
                                     <p>To scan entire objects, I needed to implement continuous point cloud fusion. 
@@ -77,11 +80,17 @@
 										My implementation was inefficient. 
 										As the map became larger, it was increasingly computationally intesive to compute the transformation and merge the point clouds.
 										This resulted in poor transformations calculations and a useless point cloud map.<br/>
-										insert gif<br/>
+										<img class="image center" src="images/icp_scan.gif" alt="" />
+										<div class="align center">
+											<p class="image center"><b>Figure 2.</b> Point cloud map generated from ICP. Map contains my desk, monitors and cabinets.</p>
+										</div>
 										I decided to use an open-source solution. I utilized the RTAB-Map ROS package for visual SLAM.
 										The SLAM algorithm allowed me to localize the camera within the point cloud map.
 										This proved to be an efficient solution.<br/>
-										insert gif<br/>
+										<img class="image center" src="images/slam_scan.gif" alt="" />
+										<div class="align center">
+											<p class="image center"><b>Figure 3.</b> Point cloud map generated from visual SLAM. Map contains my entire bedroom. Map has accurate room dimensions.</p>
+										</div>
 
 									</p>
                                     <b>3D Reconstruction</b>
