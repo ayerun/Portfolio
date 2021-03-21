@@ -80,24 +80,25 @@
 										My implementation was inefficient. 
 										As the map became larger, it was increasingly computationally intesive to compute the transformation and merge the point clouds.
 										This resulted in poor transformations calculations and a useless point cloud map.<br/>
+									</p>
 										<img class="image main" src="images/icp_scan.gif" alt="" />
 										<div class="align center">
 											<p class="image center"><b>Figure 2.</b> Point cloud map generated from ICP. Map contains my desk, monitors and cabinets.</p>
 										</div>
+									<p>
 										I decided to use an open-source solution. I utilized the RTAB-Map ROS package for visual SLAM.
 										The SLAM algorithm allowed me to localize the camera within the point cloud map.
 										This proved to be an efficient solution.<br/>
+									</p>
 										<img class="image main" src="images/slam_scan.gif" alt="" />
 										<div class="align center">
 											<p class="image center"><b>Figure 3.</b> Point cloud map generated from visual SLAM. Map contains my entire bedroom. Map has accurate room dimensions.</p>
 										</div>
-
-									</p>
                                     <b>3D Reconstruction</b>
                                     <p>Once I generated a point cloud map, I figured the project was mostly complete. 
 										Using the Point Cloud Library (PCL), I estimated the surface normals and implemented the Greedy Projection Triangulation algorithm to generate a mesh. 
 										My results were disappointing.<br/>
-										
+									</p>
 										<div id="stl_conta" style="display: block; margin: 2.5rem 0; width: 100%;"></div>
 
 			                              	  <script src="stl_viewer/stl_viewer.min.js"></script>        
@@ -119,11 +120,12 @@
 										<div class="align center">
 											<p class="image center"><b>Figure 4.</b>3D reconstruction of my work desk.</p>
 										</div>
+									<p>
 										The point cloud map looked great, but I attemped countless different combinations of meshing parameters with no success.
 										This made me believe that the estimation of surface normals was the source of error.
 										I took a step back and implemented the moving least squares algorithm in PCL to smooth the point cloud map prior to estimating surface normals.
 										The resulting meshes showed significant improvement.<br/>
-											
+									</p>	
 										<div id="stl_contb" style="display: block; margin: 2.5rem 0; width: 100%;"></div>
 
 			                              	  <script src="stl_viewer/stl_viewer.min.js"></script>        
