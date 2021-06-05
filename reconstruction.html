@@ -1,0 +1,363 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Handheld 3D Scanning and Reconstruction</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li class="active"><a href="index.html">Projects</a></li>
+							<li><a href="about.html">About</a></li>
+							<li><a href="contact.html">Contact</a></li>
+							<li><a href="Resume_Kumar.pdf" target="_blank" download>Resume</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="https://www.linkedin.com/in/arun-kumar-102197/" target="_blank" class="icon brands alt fa-linkedin"><span class="label">Linkedin</span></a></li>
+							<li><a href="https://github.com/ayerun" target="_blank" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<span class="date">January 2021 - March 2021</span>
+									<h1>Handheld 3D Scanning & Reconstruction</h1>
+								</header>
+								<div class="iframe-container"><iframe height="300px;" width="500px;" src="https://www.youtube.com/embed/oK1snEow3yI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+
+								<style>
+								  .iframe-container {
+										text-align:center;
+								  		width:100%;
+								  }
+								</style>
+								<h2>Overview</h2>
+								<p>Building off a 
+									<a href="3Dscan.html" target="_blank">previous project</a>, 
+									I created a handheld 3D scanner capable of camera localization, continuous point cloud fusion, and 3D reconstruction.
+									This pipeline was developed using ROS on a laptop then ported to a Jetson Nano and Jetson Xavier NX.
+									Currently, handheld 3D scanners sell for 
+									<a href="https://www.3dsourced.com/rankings/best-3d-scanner/" target="_blank">$6000 - $20,000</a>. 
+									This is a $400 prototype demonstrating that DIY handheld 3D scanners are feasible with COTS components. <br/>
+									<b>Note: All .stl files in this page are interative. Users can zoom and rotate 3D models. 
+										If an any .stl file fails to load they can be downloaded 
+										<a href="https://github.com/ayerun/Portfolio/tree/master/stl" target="_blank">here</a>.</b>
+								</p>
+
+								<h2>Reconstruction Pipeline</h2>
+									 <a href="images/reconstruction_diagram.png" target="_blank"><img class="image fit" src="images/reconstruction_diagram.png" alt="" /></a><br/>
+                                    <div class="align center">
+										<p class="image center"><b>Figure 1.</b>Reconstruction pipeline flowchart. Point clouds are collected to form a map. Then reconstructed into an .stl file.</p>
+									</div>
+                                    <b>Point Cloud Fusion</b>
+                                    <p>To scan entire objects, I needed to implement continuous point cloud fusion. 
+										This requires finding the transformation between each point cloud.
+										Initially, I attempted this using iterative closest point. 
+										This algorithm takes 2 point clouds and calculates the transformation for optimal alignment.
+										Using this transformation, I transformed the incoming point clouds and fused them in a point cloud map. 
+										My implementation was inefficient. 
+										As the map became larger, it was increasingly computationally intesive to compute the transformation and merge the point clouds.
+										This resulted in poor transformations calculations and a useless point cloud map.<br/>
+									</p>
+										<img class="image main" src="images/icp_scan.gif" alt="" />
+										<div class="align center">
+											<p class="image center"><b>Figure 2.</b> Point cloud map generated from ICP. Map contains my desk, monitors and cabinets.</p>
+										</div>
+									<p>
+										<br/>I decided to use an open-source solution. I utilized the RTAB-Map ROS package for visual SLAM.
+										The SLAM algorithm allowed me to localize the camera within the point cloud map.
+										This proved to be an efficient solution.<br/>
+									</p>
+										<img class="image main" src="images/slam_scan.gif" alt="" />
+										<div class="align center">
+											<p class="image center"><b>Figure 3.</b> Point cloud map generated from visual SLAM. Map contains my entire bedroom. Map has accurate room dimensions.</p>
+										</div>
+                                    <b>3D Reconstruction</b>
+                                    <p>Once I generated a point cloud map, I figured the project was mostly complete. 
+										Using the Point Cloud Library (PCL), I estimated the surface normals and implemented the Greedy Projection Triangulation algorithm to generate a mesh. 
+										My results were disappointing.<br/>
+									</p>
+										<div id="stl_conta" style="display: block; margin: 2.5rem 0; width: 100%;"></div>
+
+			                              	  <script src="stl_viewer/stl_viewer.min.js"></script>        
+				                               	 <script>
+					                                    var stl_viewer=new StlViewer
+					                                    (
+					                                        document.getElementById("stl_conta"),
+					                                        {
+					                                            auto_rotate:false,
+					                                            bgcolor:"#20FAAC",
+					                                            allow_drag_and_drop:true,
+					                                            models:
+					                                            [
+					                                                {filename:"https://raw.githubusercontent.com/ayerun/Portfolio/1a047449b151cd1f878ac00625757850ebaeb3f1/stl/desk_bad.stl"}
+					                                               ]
+					                                            }
+					                                    );
+													</script>
+										<div class="align center">
+											<p class="image center"><b>Figure 4.</b>3D reconstruction of my work desk.</p>
+										</div>
+									<p>
+										<br/>The point cloud map looked great, but I attemped countless different combinations of meshing parameters with no success.
+										This made me believe that the estimation of surface normals was the source of error.
+										I took a step back and implemented the moving least squares algorithm in PCL to smooth the point cloud map prior to estimating surface normals.
+										The resulting meshes showed significant improvement.<br/>
+									</p>	
+										<div id="stl_contb" style="display: block; margin: 2.5rem 0; width: 100%;"></div>
+
+			                              	  <script src="stl_viewer/stl_viewer.min.js"></script>        
+				                               	 <script>
+					                                    var stl_viewer=new StlViewer
+					                                    (
+					                                        document.getElementById("stl_contb"),
+					                                        {
+					                                            auto_rotate:false,
+					                                            bgcolor:"#20FAAC",
+					                                            allow_drag_and_drop:true,
+					                                            models:
+					                                            [
+					                                                {filename: "https://raw.githubusercontent.com/ayerun/Portfolio/1a047449b151cd1f878ac00625757850ebaeb3f1/stl/desk_good.stl"}
+					                                               ]
+					                                            }
+					                                    );
+													</script>
+										<div class="align center">
+											<p class="image center"><b>Figure 5.</b>3D reconstruction of my work desk after smoothing point cloud data.</p>
+										</div>
+									</p>
+
+                                <h2>Porting to Microcontrollers</h2>
+                                    <b>Streaming Point Clouds</b>
+                                    <p>Once the pipeline was functional on my computer, I began porting it to the Jetson Nano to make a handheld 3D scanner.
+										Considering I was running multiple computationally intensive algorithms using large point clouds, I was hesistant to put the full pipeline on a microcontroller.
+										I decided to stream incoming point clouds over a LAN to my laptop. Then, my laptop could perform of the intense computations.
+										I used ethernet connections throughout the system to optimize the data transfer.
+										With this setup, my laptop recieved point clouds at 0.1Hz.
+										SLAM had no hope of localizing the camera at this frequency.
+									</p>
+                                    <b>Full Pipeline on Jetson Nano</b>
+                                    <p>When running everything on my laptop point clouds messages moved through my system at 20Hz and the camera was localized at 14Hz.
+										The bottleneck of my point cloud streaming system was the ROS publisher/subsriber framework.
+										When transfering point cloud data between machines, the large point cloud messages needs to be copied.
+										When running everything on one machine, the pipeline can utilize ROS nodelets with shared memory.
+										I decided to put the entire pipeline on the Nano.
+										Point clouds moved through the pipeline at 16Hz and the camera was localized at 6Hz. 
+										This was enough for the entire pipeline to function, but there was still much room for improvement.
+										In order to scan objects, I had to move the camera incredibly slow otherwise SLAM would be unable to localize the camera.
+										Even if the algorithm regained localization of the camera, the error involved in this process would often ruin the point cloud map.
+									</p>
+									<b>Upgrading to Jetson Xavier NX</b>
+									<p>
+										I decided to use a Jetson Xavier NX as a quick solution to the Nano localization problem. 
+										The NX has a significantly more powerful CPU compared the the Nano. 
+										Point clouds moved through the pipeline at 18Hz and the camera was localized at 10Hz. 
+										Given these frequencies, I expected the NX to produce more accurate meshes than the Nano.
+										
+									</p>
+                                
+                                <h2>Results</h2>
+                                    <b>Jetson Nano</b>
+                                    <div class="stl-parent">
+                                    	<div class="stl-child">
+		                                    
+		                                    <div id="stl_cont" style="display: block; margin: 2.5rem 0; width: 100%;"></div>
+
+			                              	  <script src="stl_viewer/stl_viewer.min.js"></script>        
+				                               	 <script>
+					                                    var stl_viewer=new StlViewer
+					                                    (
+					                                        document.getElementById("stl_cont"),
+					                                        {
+					                                            auto_rotate:false,
+					                                            bgcolor:"#20FAAC",
+					                                            allow_drag_and_drop:true,
+					                                            models:
+					                                            [
+					                                                {filename:"https://raw.githubusercontent.com/ayerun/Portfolio/f20e179f958c6023475d4152b11a5b850f734801/stl/nano_guitar_cropped.STL"}
+					                                               ]
+					                                            }
+					                                    );
+					                                </script>
+					                    </div>
+
+		                                 <div class="stl-child">
+			                                 <div id="stl_cont2" style="display: block; margin: 2.5rem 0; width: 100%;"></div>
+
+				                                <script src="stl_viewer/stl_viewer.min.js"></script>        
+				                                <script>
+				                                    var stl_viewer=new StlViewer
+				                                    (
+				                                        document.getElementById("stl_cont2"),
+				                                        {
+				                                            auto_rotate:false,
+				                                            bgcolor:"#20FAAC",
+				                                            allow_drag_and_drop:true,
+				                                            models:
+				                                            [
+				                                                {filename:"https://raw.githubusercontent.com/ayerun/Portfolio/f20e179f958c6023475d4152b11a5b850f734801/stl/nano_couch_cropped.STL"}
+				                                               ]
+				                                            }
+				                                    );
+				                                </script>
+		                                </div>
+                                </div>
+                                    <p></p>
+                                    <b>Jetson Xavier NX</b>
+                                    <div class="stl-parent">
+                                    	<div class="stl-child">
+		                                    
+		                                    <div id="stl_cont3" style="display: block; margin: 2.5rem 0; width: 100%;"></div>
+
+			                              	  <script src="stl_viewer/stl_viewer.min.js"></script>        
+				                               	 <script>
+					                                    var stl_viewer=new StlViewer
+					                                    (
+					                                        document.getElementById("stl_cont3"),
+					                                        {
+					                                            auto_rotate:false,
+					                                            bgcolor:"#20FAAC",
+					                                            allow_drag_and_drop:true,
+					                                            models:
+					                                            [
+					                                                {filename:"https://raw.githubusercontent.com/ayerun/Portfolio/f20e179f958c6023475d4152b11a5b850f734801/stl/nx_guitar_cropped.STL"}
+					                                               ]
+					                                            }
+					                                    );
+					                                </script>
+					                    </div>
+
+		                                 <div class="stl-child">
+			                                 <div id="stl_cont4" style="display: block; margin: 2.5rem 0; width: 100%;"></div>
+
+				                                <script src="stl_viewer/stl_viewer.min.js"></script>        
+				                                <script>
+				                                    var stl_viewer=new StlViewer
+				                                    (
+				                                        document.getElementById("stl_cont4"),
+				                                        {
+				                                            auto_rotate:false,
+				                                            bgcolor:"#20FAAC",
+				                                            allow_drag_and_drop:true,
+				                                            models:
+				                                            [
+				                                                {filename:"https://raw.githubusercontent.com/ayerun/Portfolio/f20e179f958c6023475d4152b11a5b850f734801/stl/nx_couch_cropped.STL"}
+				                                               ]
+				                                            }
+				                                    );
+				                                </script>
+		                                </div>
+                                </div>
+                                    <b>Laptop</b>
+									 <div class="stl-parent">
+                                    	<div class="stl-child">
+		                                    
+		                                    <div id="stl_cont5" style="display: block; margin: 2.5rem 0; width: 100%;"></div>
+
+			                              	  <script src="stl_viewer/stl_viewer.min.js"></script>        
+				                               	 <script>
+					                                    var stl_viewer=new StlViewer
+					                                    (
+					                                        document.getElementById("stl_cont5"),
+					                                        {
+					                                            auto_rotate:false,
+					                                            bgcolor:"#20FAAC",
+					                                            allow_drag_and_drop:true,
+					                                            models:
+					                                            [
+					                                                {filename:"https://raw.githubusercontent.com/jenwu98/arun/223ba07e4e09c8637c60e9d5ac83aad1a5279400/laptop_guitar_cropped.STL"}
+					                                               ]
+					                                            }
+					                                    );
+					                                </script>
+					                    </div>
+
+		                                 <div class="stl-child">
+			                                 <div id="stl_cont6" style="display: block; margin: 2.5rem 0; width: 100%;"></div>
+
+				                                <script src="stl_viewer/stl_viewer.min.js"></script>        
+				                                <script>
+				                                    var stl_viewer=new StlViewer
+				                                    (
+				                                        document.getElementById("stl_cont6"),
+				                                        {
+				                                            auto_rotate:false,
+				                                            bgcolor:"#20FAAC",
+				                                            allow_drag_and_drop:true,
+				                                            models:
+				                                            [
+				                                                {filename:"https://raw.githubusercontent.com/jenwu98/arun/223ba07e4e09c8637c60e9d5ac83aad1a5279400/laptop_couch_cropped.STL"}
+				                                               ]
+				                                            }
+				                                    );
+				                                </script>
+		                                </div>
+                                </div>
+									
+								<h2>Discussion</h2>
+									<p>The results do not perfectly align with my expectations. 
+										Specifically, I expected the .stl files generated from the NX to be a large improvement from the Nano.
+										I believe I still can produce superior meshes from the NX, however I need to tune the parameters. 
+										The most time consuming aspect of this project was tuning all the parameters involved in the pipeline. 
+										Each new device requires new scanning parameters and new meshing parameters.
+										When I first developed the pipeline, I tuned everything for my laptop.
+										To optimize performance on the Nano, I clipped the distance of the RGB-D camera and slightly increased the point cloud voxelization.
+										The changes propogated through the pipeline, so new meshing parameters were necessary.</p>
+									<b>Primary System Limitations:</b>
+									<p>
+										- Difficulty tuning parameters for various devices<br/>
+										- Difficulty tuning parameters for target objects of various sizes and geometries<br/>
+									</p>
+
+								<h2>Future Work</h2>
+									<p>
+										An interesting extension to this project, would be to use machine learning to optimize the meshing parameters. 
+										In an ideal system the user would input their hardware specifications and target object specifications.
+										These specifications would directly correlate to scanning parameters.
+										Given scanning parameters and target object specifications, machine learning could be used to optimize the meshing parameters.
+										This would address the primary limitations of my current system.
+									</p>
+
+
+                                <h1><a href="https://github.com/ayerun/3D_Reconstruction" target="_blank">-View Full Source Code-</a></h1>
+							</section>
+					</div>
+
+				<!-- Copyright -->
+					<div id="copyright">
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+	</body>
+</html>
