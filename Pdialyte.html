@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Pdialyte Effects Pedal</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li class="active"><a href="index.html">Projects</a></li>
+							<li><a href="about.html">About</a></li>
+							<li><a href="contact.html">Contact</a></li>
+							<li><a href="Resume_Kumar.pdf" target="_blank" download>Resume</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="https://www.linkedin.com/in/arun-kumar-102197/" target="_blank" class="icon brands alt fa-linkedin"><span class="label">Linkedin</span></a></li>
+							<li><a href="https://github.com/ayerun" target="_blank" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<span class="date">April 2020 - June 2020</span>
+									<h1>Pdialyte Effects Pedal</h1>
+                                    <p>I designed and manufactured a guitar pedal with customizable effects.
+                                        Anyone with background in MAX/MSP or Pure Data (Pd) should be able design sound effects for this platform. 
+                                        Pedal runs Pd on a Jetson Nano. 
+                                        All DSP is done in software at low latency (~8ms).
+                                        Pedal works with any quarter inch instrument/mic. 
+                                        I made this platform cheap, open source, and intuitive so hopefully other musician/engineers would contribute to a shared library of unique and creative sound effects. 
+                                        </p>
+								</header>
+								<div class="iframe-container"><iframe width="560" height="315" src="https://www.youtube.com/embed/IDm-Hvlwirs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+                                <style>
+                                    .iframe-container {
+                                          text-align:center;
+                                            width:100%;
+                                    }
+                                </style>
+
+								<h2>Motivation</h2>
+								<p>My preferred niche of music is anything with abnormal sounds. 
+                                    As a guitarist, this resulted in me blowing unacceptable amounts of money on effect pedals.
+                                    In a traditional guitar pedal, all the signal processing is done in a circuit. 
+                                    This is outdated. 
+                                    A few years ago, I was introduced to MAX/MSP. -add link- 
+                                    This made me realize anyone with a computer has access to unlimted sound effects. 
+                                    Recently, I started working with Pure Data (Pd). -add link- 
+                                    Pd is a free and open source visual programming language for signal processing.
+                                    Though the interface is not as pretty as MAX, Pd serves the same purpose and can run on Linux-based embedded systems.
+                                    This compelled me to build a stompbox effects pedal in which the user can easily create an upload their own sound effects. 
+                                    
+								</p>
+
+								<h2>System Architecture</h2>
+                                <p><b>First Iteration</b><br/>
+                                    -insert diagram-<br/>
+                                    In it's initial form, I used two microcontrollers, an Arduino and Jetson Nano. The stomp button was used to turn the effect on/off. 
+                                    The LCD touchscreen displayed all effect parameters to the user. 
+                                    The potentiometer was used to vary the selected parameter.
+                                    All these sensors were connected to the Arduino serially sent the information the Pd running on the Nano.
+                                    The user connected their instrument to an audio interface plugged into the Nano. 
+                                    This would send the audio signal through Pd, then out their speaker. <br/>
+                                    There were many faults to this system. 
+                                    First the touchscreen was cheap, barely responsive, and used countless GPIO pins. 
+                                    The potentiometer could not rotate continuously. 
+                                    And lastly, the serial protocol complicated the Pd patch. It worked, but it was too complicated to expect new users to figure out. <br/><br/>
+                                    <b>Current Iteration</b><br/>
+                                    -insert diagram-<br/>
+                                    The all the improvements in this iteration stemmed from the swapping the touchscreen with a simple 16x2 LCD. 
+                                    This allowed me to connect all peripherals to the Nano removing the Arduino. 
+                                    I wrote a Python script -insert link- that reads/writes data from the peripherals. 
+                                    Using a TCP socket, Python is able to send data Pd using a simple protocol.
+                                    Audio input/output remains unchanged in this iteration.
+                                </p>
+                                
+                                <h2>Physical Design</h2>
+                                <p>-insert pictures-</p>
+
+                                <h2>Bill of Materials</h2>
+                                <p><b>Primary Materials</b><br/>
+                                    • x1 <a href="https://developer.nvidia.com/embedded/jetson-nano-developer-kit" target="_blank">Jetson Nano</a>
+                                     - $99<br/>
+                                    • x1 <a href="https://www.sparkfun.com/products/15083" target="_blank">I2C Rotary Encoder</a>
+                                     - $22.95<br/>
+                                    • x1 <a href="https://www.amazon.com/HiLetgo-Display-Backlight-Controller-Character/dp/B00HJ6AFW6/ref=sr_1_3?dchild=1&keywords=16x2+lcd&qid=1622848667&sr=8-3" target="_blank">16x2 LCD</a>
+                                     - $7.50<br/>
+                                    • x1 <a href="https://www.amazon.com/Adafruit-Potentiometer-Breadboard-Friendly-ADA562/dp/B00NAY3O88/ref=sr_1_3?crid=2EWQDJ839WEUD&dchild=1&keywords=10k+potentiometer+panel+mount&qid=1622849631&sprefix=10k+pote%2Caps%2C177&sr=8-3" target="_blank">10k Panel Mount Potentiometer</a>
+                                     - $4.49<br/>
+                                    • x1 <a href="https://www.amazon.com/PSCCO-Electric-Guitar-Effects-Momentary/dp/B07YZ5FZRK/ref=sr_1_5?dchild=1&keywords=stomp+button&qid=1622849848&sr=8-5" target="_blank">Stomp Button</a>
+                                     - $5.99<br/>
+                                    Total: $139.93<br/>
+
+                                    <b>Miscellaneous Materials</b><br/>
+                                    • 3D Printing Filament<br/>
+                                    • Acrylic<br/>
+                                    • x6 #4 Machine Screws and Nuts<br/>
+                                    • x4 #6 Machine Screws and Nuts<br/>
+                                    • x4 M2 Machine Screws and Nuts<br/>
+                                    • Jumper Wires<br/>
+                                    • x1 1k Resistor<br/>
+                                    • <a href="https://www.amazon.com/gp/product/B01N922DLO/ref=ppx_yo_dt_b_asin_title_o02_s00?ie=UTF8&psc=1" target="_blank">Bumpers</a>
+
+                                </p>
+
+                                <h2>Creating Sound Effects</h2>
+                                <p> One of my primary goals in this project was to make it <u>as easy as possible</u> to develop sound effects for this platform. 
+                                    Each sound effect requires 2 files, a Pd patch and a Python script. 
+                                    The Python script essentially writes itself so you only need to make the Pd patch. Let me explain.<br/>
+                                    <b>Pure Data Patch</b><br/>
+                                    -insert highlighted Pd patch-<br/>
+                                    Everything highlighted in yellow in figure x. was taken from <a href="http://msp.ucsd.edu/techniques/latest/book-html/node125.html" target="_blank">Pd example G09</a> by Miller Puckette.
+                                    Everything else highlighted in blue and green make this example patch work with my platform. 
+                                    The part in green recieves and routes information from Python. This allows you to control various effect parameters.
+                                    The part in blue turns the effect on/off when you press the stomp button on the pedal.<br/>
+                                    <b>Python Script</b><br/>
+                                    The Python scipt to make the pitchshifter work is lengthy. You can view it here -insert link-. 
+                                    However to make a new sound effect, you can copy and paste the entire script. 
+                                    These are the only lines of code you will need to modify.<br/>
+                                    -insert lines of code-<br/>
+                                    Replace these lines of the code with a parameter name, lower limit, upper limit, unit (if any), and initializing value respectively.
+								</p>
+
+								<h2>Future Work</h2>
+                                <p>This will be an ongoing project for the foreseeable future. Here is what to expect in future iterations.<br/>
+                                    • Raspberry Pi replacing Jetson Nano<br/>
+                                    • Use of JACK Audio Connection Kit to further reduce latency<br/>
+                                    • PCB for all electronics<br/>
+                                    • Button(s) to save/recall effect configurations<br/>
+                                    • Chaining multiple sound effects together in a single pedal
+                                </p>
+                                
+
+								<h2>Acknowledgements</h2>
+                                <p>Professor Stephan Moore for project guidance.<br/>
+                                    Professor Ben Sutherland for introducing me to the world of DSP.<br/>
+                                    Jen Wu for listening to me ramble about guitar pedals for months.<br/>
+                                    Pierre Massat for his similar work, <a href="https://guitarextended.wordpress.com/" target="_blank">Guitar Extended</a>. 
+                                    If you happen to stumble across this post, please reach out to me. I would love to talk.
+								</p>
+                                <h1><a href="https://github.com/ayerun/Robotic_3D_Scanner" target="_blank">-View Full Source Code-</a></h1>
+							</section>
+
+					</div>
+
+				<!-- Copyright -->
+					<div id="copyright">
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

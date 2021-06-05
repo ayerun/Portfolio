@@ -10,7 +10,18 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+        <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script type="text/javascript" id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+        </script>
+        <script>
+        window.MathJax = {
+            tex: {
+              tags: 'ams'
+            }
+          };
+        </script>
 	</head>
 	<body class="is-preload">
 
@@ -42,139 +53,113 @@
 							<section class="post">
 								<header class="major">
 									<span class="date">January 2021 - March 2021</span>
-									<h1>SLAM from Scratch</h1>
-                                    <p>Wrote all software for differential drive with odometry. Then, I implemented extended kalman filter for SLAM.</p>
-								</header>
-								<div class="image main"><img src="images/slam_cropped.png" alt="" /></div>
+									<h1>Differential Drive & SLAM from Scratch</h1>
+                                    <p>Wrote all software for differential drive with (dead reckoning) odometry. Then, implemented an extended kalman filter for SLAM.</p>
+                                </header>
+                                
+                                <div class="image main"><img src="images/slam_cropped.png" alt="" /></div>
+                                
 								<h2>Overview</h2>
-								<p>We created an automated system for reconstructing objects with point clouds. 
-                                    The system hardware includes a Rethink Sawyer robot arm, an Intel RealSense camera, and a TurtleBot3 Burger.
-                                    The TurtleBot3 is used as a turntable for the object being scanned. 
-                                    As the Turtlebot3 rotates, The RealSense saves a point cloud every 90 degrees of rotation to capture all sides of the object.
-                                    Then, the arm moves the RealSense to a top-down view for the final scan.
-                                    All saved point clouds are transformed and fused into a single pointcloud.
-                                    The background is then cropped from the final point cloud.
-                                    All software was written using C++ and Python within the ROS communication framework.<br/>
-                                    <img class="image center" src="images/robot_scanning.gif" alt="" />
-                                    <div class="align center">
-										<p class="image center" style="font-size: 16px;"><b>Figure 1.</b> Robotic 3D scanning of a bottle. Robotic arm holds depth camera as robotic turntable spins the bottle. Gif plays at 2x real speed.</p>
-                                    </div>
+								<p> In this project, I took a Turtlebot3 Burger and removed all the preinstalled ROS software. 
+                                    Then, I wrote, tested, and implemented my own C++ scripts for 2D transformations, differential drive, odometry, and SLAM. 
+                                    This project served as a learning experience in ROS/C++ and demonstrates my knowledge of robotic software development.
+                                    The only robotic software in this project that I did not code myself is the C code controlling the motors and lidar.<br/>
+                                    -insert gif of turtlebot-
                                 </p>
 
-								<h2>Point Cloud Processing Pipeline</h2>
-								<p>My primary contribution to this project was the software that collects point cloud data and reconstructs the object being scanned. 
-                                    Using the publisher/subscriber infrastructure in ROS, I created a Python script and a C++ that work together for scanning and reconstruction.
-                                    The scanning is done in the Python node, 
-                                    <a href="https://github.com/ayerun/Robotic_3D_Scanner/blob/master/camera_reconstruct/nodes/generate_pc" target="_blank">generate_pc</a>.
-                                    This node provides a service to save point clouds from the RealSense camera.
-                                    Everytime a point cloud is saved, the service transforms the point cloud from a camera frame to a TurtleBot3 frame.
-                                    This rotates the point cloud based on odometry data from the TurtleBot3.
-                                    Saved point clouds are published to the saved_pcs topic.
-                                    The <a href="https://github.com/ayerun/Robotic_3D_Scanner/blob/master/camera_reconstruct/nodes/fuse_pc.cpp" target="_blank">fuse_pc</a> 
-                                    node is a C++ script that subscribes to the saved_pcs topic.
-                                    As point clouds are saved, each newly saved point cloud is fused with the previously saved point clouds.
-                                    After fusion, the script crops background data from the fused point cloud leaving just the scanned object.
-                                    The final point cloud is published to the fused_pcs topic.
-                                    <br/>
-                                    <img class="image center" src="images/pipeline.png" alt="" />
-                                    <div class="align center">
-										<p class="image center" style="font-size: 16px;"><b>Figure 2.</b> ROS nodes and topics in point cloud processing pipeline. Generate_pc saves and transforms point clouds. Fuse_pc fuses and crops background from point clouds.</p>
-                                    </div>
+                                <h2>Setup</h2>
+                                <h4>Robot Visualization</h4>
+                                <p> I started this project by creating a ROS package (-insert link-) for robot visualization in Rviz. 
+                                    This was the first step in the simulation process. 
+                                    It was imperative to test my software in simulation prior to deploying new features onto the physical robot. 
+                                    The controlled simulation environment simplifies the process of finding a correcting errors in my code. 
+                                    This ROS package utilizes the URDF files written by the TurtleBot manufacturer to display the Robot in Rviz.<br/>
+                                    -insert rviz pic-
+                                </p>
+								<h4>2D Tranformations</h4>
+                                <p> Due to the math involved in differential drive and odometry, I decided to write a C++ library (-insert rigid2d link-) for 2D transformations. 
+                                    The library provides data structures for 2D transformations, vectors, and twists.
+                                    I wrote standard operator overload methods for addition, subtraction, and multiplication as well as methods for applying transformations to vectors and twists.
+                                    The library was heavily tested (-insert link-). It serves as the backbone to all the software a created from this point.
 								</p>
 
-								<h2>Networking</h2>
-								<p>One of the biggest challenges of this project was networking between multiple robots. 
-                                    For this project to be successful we needed all robots and computers to communicate on the same ROS_MASTER_URI.
-                                    We solved this challenged by connecting all robots and computers to the same router.
-                                    By connecting the router to the internet, we were able to syncronize time between machines allowing for seemless communication. 
-                                    <img class="image center" src="images/networking.png" alt="" />
+								<h2>Kinematics</h2>
+								<p> Differential drive robots are controlled by a twist representing body velocity and angular velocity. 
+                                    This means to control the robot, I needed to calculate the wheel velocities that achieve the desired twist. 
+                                    I used the following diagram to derive the relationship between wheel velocities and body twist.
+                                </p>
+                                    <img class="image center" src="images/kinematics.jpg" alt="" /><br/>
                                     <div class="align center">
-										<p class="image center" style="font-size: 16px;"><b>Figure 3.</b> Networking diagram of robotic 3D scanner. Robots communicate and syncronize time through a router.</p>
+                                        <p class="image center"><b>Figure 1.</b> 
+                                            Reference frames for TurtleBot. X axes are in red and y axes are in greed. 
+                                            Frame b is the body, r is the right wheel, and l is the left wheel.
+                                        </p>
                                     </div>
+                                <p>
+                                    To start the derivation, I wrote the transformation matricies from the body to the wheels.<br/>
+                                    $$T_{bl} = \begin{bmatrix} 1 & 0 & 0\\ 0 & 1 & D \\ 0 & 0 & 1 \end{bmatrix} \hspace{10mm}
+                                    T_{br} = \begin{bmatrix} 1 & 0 & 0\\ 0 & 1 & -D \\ 0 & 0 & 1 \end{bmatrix}$$
+
+                                    Then, I wrote the adjoint matricies between the body and wheels.<br/>
+                                    $$A_{bl} = \begin{bmatrix} 1 & 0 & 0\\ D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} \hspace{10mm}
+                                    A_{br} = \begin{bmatrix} 1 & 0 & 0\\ -D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+                                    $$A_{lb} = \begin{bmatrix} 1 & 0 & 0\\ -D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} \hspace{10mm}
+                                    A_{rb} = \begin{bmatrix} 1 & 0 & 0\\ D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+
+                                    The following equation is used to relate twist in the wheel frame to the control.<br/>
+                                    $$\begin{bmatrix} \dot{x_i} \\ \dot{y_i} \end{bmatrix} = \begin{bmatrix} r\dot{&phi;}_i \\ 0 \end{bmatrix}$$
+                                    r is the wheel radius<br/>
+                                    \(\dot{&phi;}\) is the rotational velocity<br/>
+                                    i is the wheel (l or r in this case)<br/><br/>
+
+                                    Now, I can rewrite the body twist in the wheel frames.<br/>
+                                    $$V_b = \begin{bmatrix} \dot{&theta;} \\ \dot{x} \\ \dot{y} \end{bmatrix} \hspace{10mm}
+                                    V_i = \begin{bmatrix} \dot{&theta;} \\ r\dot{&phi;}_i \\ 0 \end{bmatrix}$$
+
+                                    Since I am calculating controls, I want to solve for \(\dot{&phi;}_i\) in terms of D, r, \(\dot{&theta;}\), and \(\dot{x}\). 
+                                    I used the following relationships to do so.<br/>
+                                    $$V_l = A_{lb}V_b$$
+                                    $$\begin{bmatrix} \dot{&theta;} \\ r\dot{&phi;}_l \\ 0 \end{bmatrix} = 
+                                    \begin{bmatrix} 1 & 0 & 0\\ -D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}
+                                    \begin{bmatrix} \dot{&theta;} \\ \dot{x} \\ \dot{y} \end{bmatrix}$$
+                                    $$\begin{equation} \mathbf{\dot{&phi;}_l = \frac{-D\dot{&theta;}+\dot{x}}{r}} \end{equation}$$
+                                    <br/>
+                                    $$V_r = A_{rb}V_b$$
+                                    $$\begin{bmatrix} \dot{&theta;} \\ r\dot{&phi;}_r \\ 0 \end{bmatrix} = 
+                                    \begin{bmatrix} 1 & 0 & 0\\ D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}
+                                    \begin{bmatrix} \dot{&theta;} \\ \dot{x} \\ \dot{y} \end{bmatrix}$$
+                                    $$\begin{equation} \mathbf{\dot{&phi;}_r = \frac{D\dot{&theta;}+\dot{x}}{r}} \end{equation}$$
+
+                                    With the rigid2d library, I implemented the kinematics for differential drive in a class called diff_drive (-insert link-).
+                                    I wrote a ROS node called fake_turtle (-insert link-) that converts body velocities to wheel controls the publishes the controls.
+                                    This allowed me to visualize the code in Rviz.
+                                    (-insert gif of wheels moving-)
                                 </p>
                                 
-                                <h2>Robotic Motion</h2>
-                                <p> The motion of the Sawyer arm and TurtleBot3 are controlled by two nodes, 
-                                    <a href="https://github.com/ayerun/Robotic_3D_Scanner/blob/master/arm_motion/nodes/turntable" target="_blank">turntable</a> and 
-                                    <a href="https://github.com/ayerun/Robotic_3D_Scanner/blob/master/arm_motion/nodes/scanner_arm" target="_blank">scanner_arm</a>. 
-                                    The turntable node controls the TurtleBot3's rotation. It provides a ROS service to rotate the TurtleBot3 by a desired angle.
-                                    The scanner_arm node utilizes the services provided by the turntable and generate_pc nodes. 
-                                    This script sends commands to rotate the TurtleBot3 and save point clouds from the RealSense at the appropriate times.
+                                <h2>Odometry</h2>
+                                <p> To make the robot move in simulation, I needed to implement odometry. 
+                                    There are two ways I could have done this, using IMU or dead reckoning. 
+                                    The original TurtleBot software uses IMU which is often inaccurate due to sensor noise.
+                                    I decided to use dead reckoning. 
+                                    This method uses the change in wheel angles to calculate the robot's location.
+                                    It performs best on flat planes with minimal slip.
+                                    Since I typically drive the Turtlebot on a wood floor with good traction, this was the obvious choice.
+                                    The first step to dead reckoning is obtaining the angular velocities of the wheels.
+                                    Using the wheel encoders, I was able to measure the the angular velocities.
+                                    Then I calculated the body twist by rearranging equations (1) and (2).
+                                    $$V_b = \begin{bmatrix} \dot{&theta;} \\ \dot{x} \\ \dot{y} \end{bmatrix} = 
+                                    \begin{bmatrix} \frac{r(\dot{&phi;}_r-\dot{&phi;}_l)}{2D} \\ \frac{r(\dot{&phi;}_r+\dot{&phi;}_l)}{2} \\ 0 \end{bmatrix}$$
+                                    The next step is integrating the twist \(V_b\) to find the change in position and orientation \(T_{bb'}\) where {b} is the original body frame and {b'} is the body frame after movement.
 								</p>
 
-								<h2>Flaws & Improvements</h2>
-								<p>This project contains many subsystems that needed to be developed before we could begin testing and improving the entire system.
-                                    This section will touch on the changes we were able to make during final testing.
+								<h2>SLAM in Simulation</h2>
+								<p>
                                 </p>
-                                <p><b>TurtleBot3 Odometry</b><br/>
-                                    The backbone of our project was the point cloud processing pipeline. 
-                                    This pipeline relied on the TurtleBot3's odometry (from IMU) to transform saved point clouds before fusion. 
-                                    Uncertainty in the odometry resulted in poorly fused point clouds. The results of this are shown in the gifs below.<br/>
-                                    <div class="row"> 
-                                        <div class="column-3">    
-                                            <img src="images/windex.gif" alt="" style="width: 100%; height: 100%;"/>
-                                        </div>
-                                        <div class="column-3">    
-                                            <img src="images/octopus_cropped.gif" alt="" style="width: 100%; height: 100%;"/>
-                                        </div>
-                                        <div class="column-3">    
-                                            <img src="images/bottle.gif" alt="" style="width: 100%; height: 100%;"/>
-                                        </div>
-                                    </div>
-                                    <div class="align center">
-										<p class="image center" style="font-size: 16px;"><b>Figure 4.</b> 3D scans using TurtleBot3 odometry for transformations. Expo bottle (left), Soldering clamp stand (center), White water bottle (right).</p>
-                                    </div>
-                                </p>
-                                <p>
-                                    Moving forward, we had two options. 
-                                    The first option was to manually calculate the rotation of the TurtleBot3 by integrating the joint states of the wheels. 
-                                    We decided against this solution because the TurtleBot3 has noticeable drift during rotation, and this solution assumes the TurtleBot3 rotates without translation.
-                                    The second option was to use SLAM instead of odometry data.
-                                </p>
-                                <p>
-                                    <b>SLAM</b><br/>
-                                    To incorporate SLAM, we took advantage of the ROS SLAM Toolbox and modified the point cloud processing pipeline. 
-                                    We created two new ROS nodes, 
-                                    <a href="https://github.com/ayerun/Robotic_3D_Scanner/blob/master/camera_reconstruct/nodes/generate_pc_slam" target="_blank">generate_pc_SLAM</a> and 
-                                    <a href="https://github.com/ayerun/Robotic_3D_Scanner/blob/master/camera_reconstruct/nodes/fuse_pc_slam.cpp" target="_blank">fuse_pc_SLAM</a>, 
-                                    that transform point clouds using localization from SLAM.
-                                    Unfortuantely, we were unable to crop the background of these point clouds before the project deadline.
-                                    The results are shown in the gifs below.<br/>
-                                    <div class="row">
-										<div class="column-2">
-											<img src="images/shoe.gif" alt="" style="width: 100%;"/>
-										</div>
-										<div class="column-2">
-											<img src="images/clorox2.gif" style="width: 100%;"/>
-										</div>
-                                    </div>
-                                    <div class="align center">
-										<p class="image center" style="font-size: 16px;"><b>Figure 5.</b> 3D scans using SLAM for transformations. White shoe (left), Clorox bottle (right).</p>
-                                    </div>
-								</p>
 
 								<h2>Future Work</h2>
 								<p>
-                                    <b>Continuous Point Cloud Fusion</b><br/>
-                                    One of the main shortcomings of this project was the fact that our pipeline only fused five pointclouds each a 90 degree rotation from each other.
-                                    For optimal scanning, we would like to (almost) continuously save and fuse point clouds as the TurtleBot3 is rotating.
-                                    To do this we could implement the iterative closest point (ICP) algorithm to fuse the point clouds.
                                 </p>
-                                <p>
-                                    <b>Multi Angle Scan</b><br/>
-                                    Using the ICP algorithm would allow for more freedom with arm movement as well. 
-                                    By moving the arm to various vantage points, we could collect more depth data for fusion and create more accurate 3D scans. 
-                                    We began implementing the arm motion for this feature in a node named 
-                                    <a href="https://github.com/ayerun/Robotic_3D_Scanner/blob/master/arm_motion/nodes/scanner_arm_multi" target="_blank">scanner_arm_multi</a>.
-								</p>
 
-								<h2>Teammates</h2>
-								<p>
-									Tianyu Li<br/>
-									Yen Chin Loke<br/>
-									Bowen Feng<br/>
-									Nicole Baptist<br/>
-                                </p>
                                 <h1><a href="https://github.com/ayerun/Robotic_3D_Scanner" target="_blank">-View Full Source Code-</a></h1>
 							</section>
 
