@@ -51,7 +51,7 @@
                                         Drone autonomously detects and responds to immediate weather conditions to ensure drone safety.
                                     </p>
 								</header>
-								<div class="image main"><img src="images/UAV.gif" alt="" /></div>
+								<div class="image main"><img src="images/UAV.gif" alt="" />
 								<h2>Overview</h2>
 								<p>The purpose of this project is to improve the safety of autonomous unmanned aerial vehicle flight. 
 									Our team designed and implemented a flight management computer that enables drones to autonomously detect and response to current weather conditions.
@@ -68,6 +68,7 @@
 									The sensors from table 1, were strategically mounted to avoid down wash from the propellers.
 									The flight management computer was placed on the lower mounting plate to keep sensitive electronics sheltered.
 									A parachute was added to the drone as a last resort fail-safe.
+								</p>
 
 									<div class="row"> 
                                         <div class="column-2">    
@@ -78,18 +79,12 @@
 										</div>
 									</div>
 									<div class="align center">
-										<p class="image center"><b>Figure 1.</b> Exploded views of the drone highlighting key components.</p>
+										<p class="image center"><b>Figure 1.</b> Exploded views of the drone highlighting key components.</p><br/>
 									</div>
 									<div class="align center">
 										<img class="image center" src="images/sensor_data.png" alt="" style="width: 70%;"/>
 										<p class="image center"><b>Table 1.</b> Breakdown of all utilized data from on-board sensors. Measurement redundancies allow for sensor failure without system failure.</p>
-									</div>
-									<!-- <div>
-                                        <div class="column-3">    
-                                            <img src="images/sensor_data.png"  alt="" style="width: 100%; height: 100%;"/>
-                                        </div>
-                                    </div> -->
-                                </p>
+									</div><br/>
 
 								<h2>Flight Management Computer (FMC)</h2>
                                 <p>
@@ -109,17 +104,16 @@
 									4. Send flight commands to Pixhawk based on data analysis<br/>
 									5. Record video during flight<br/>
 									6. Save all collected data to a .csv file<br/>
-
+								</p>
 									
 									<img class="image center" src="images/System_Diagram.png" alt="" />
 									<div class="align center">
 										<p class="image center"><b>Figure 2.</b> Schematic of all physical connections between microcontrollers and sensors.</p>
-									</div>
+									</div><br/>
 									<img class="image center" src="images/software_systems.png" alt="" style="width: 100%;"/><br/>
 									<div class="align center">
 										<p class="image center"><b>Figure 3.</b> Data flowchart of FMC. Communication protocols and software running on each microcontroller are highlighted in this diagram.</p>
-									</div>
-								</p>
+									</div><br/>
                                 
                                 <h2>Conclusion</h2>
                                 <p>The FMS has the ability to be installed on various drones with minimal modifications. 
