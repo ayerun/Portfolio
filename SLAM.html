@@ -57,7 +57,7 @@
                                     <p>Wrote all software for differential drive with (dead reckoning) odometry. Then, implemented an extended kalman filter for SLAM.</p>
                                 </header>
                                 
-                                <div class="image main"><img src="images/slam_cropped.png" alt="" /></div>
+                                <div class="image main"><img src="images/SLAM/slam_cropped.png" alt="" /></div>
                                 
 								<h2>Overview</h2>
 								<p> In this project, I took a Turtlebot3 Burger and removed all the preinstalled ROS software. 
@@ -88,7 +88,7 @@
                                     This means to control the robot, I needed to calculate the wheel velocities that achieve the desired twist. 
                                     I used the following diagram to derive the relationship between wheel velocities and body twist.
                                 </p>
-                                    <img class="image center" src="images/kinematics.jpg" alt="" /><br/>
+                                    <img class="image center" src="images/SLAM/kinematics.jpg" alt="" /><br/>
                                     <div class="align center">
                                         <p class="image center"><b>Figure 1.</b> 
                                             Reference frames for TurtleBot. X axes are in red and y axes are in greed. 
@@ -149,11 +149,59 @@
                                     Then I calculated the body twist by rearranging equations (1) and (2).
                                     $$V_b = \begin{bmatrix} \dot{&theta;} \\ \dot{x} \\ \dot{y} \end{bmatrix} = 
                                     \begin{bmatrix} \frac{r(\dot{&phi;}_r-\dot{&phi;}_l)}{2D} \\ \frac{r(\dot{&phi;}_r+\dot{&phi;}_l)}{2} \\ 0 \end{bmatrix}$$
-                                    The next step is integrating the twist \(V_b\) to find the change in position and orientation \(T_{bb'}\) where {b} is the original body frame and {b'} is the body frame after movement.
+                                    The next step is integrating the twist \(V_b\) to find the change in position and orientation \(T_{bb'}\) where {b} is the original body frame and {b'} is the body frame after movement. 
+                                    You could do this using matrix exponentials, but that is computationally expensive. 
+                                    In 2D, there are more efficient methods. 
+                                    When integrating the twist in 2D, there are two scenarios.<br/><br/>
+                                    <b>Sceneraio 1: Translation without Rotation</b><br/>
+                                    In the case \(V_b\) has no rotational component, \(T_{bb'}\) is a pure translation determined by the twist.
+                                    $$V_b = \begin{bmatrix} 0 \\ \dot{x} \\ \dot{y} \end{bmatrix} \hspace{10mm}
+                                    T_{bb'} = \begin{bmatrix} 1 & 0 & \dot{x}\\ 0 & 1 & \dot{y} \\ 0 & 0 & 1 \end{bmatrix}$$
+                                    <b>Scenario 2: Translation with Rotation</b><br/>
+                                    In the case \(V_b\) has translational and rotational comopnents, the math gets more complicated.
+                                    For any two unit vectors (vector a and vector b) on a plane, there is a pure rotation that transforms vector a to vector b.
+                                    Finding the center of rotation in the frame aligned with {b} is the first step to integrate the twist. 
+                                    I will refer to frame {s} as the frame at the center of rotation in the orientation of frame {b}.
+                                    I will refer to frame {s'} as the frame at the center of rotation in the orientation of frame {b'}.
+                                    I determined the location of frame {s} using the adjoint. 
+                                    $$\begin{bmatrix} 1 & 0 & 0\\ y_{s} & 1 & 0 \\ -x_{s} & 0 & 1 \end{bmatrix}
+                                    \begin{bmatrix} &Delta; &theta; \\ &Delta; x_{b} \\ &Delta; y_{b} \end{bmatrix} = 
+                                    \begin{bmatrix} \dot{&theta;} \\ 0 \\ 0 \end{bmatrix}$$
+                                    Solving for \(x_{s}\) and \(y_{s}\) gives you \(T_{bs}\)
+                                    $$T_{bs} = \begin{bmatrix} 1 & 0 & x_{s} \\ 0 & 1 & y_{s} \\ 0 & 0 & 1 \end{bmatrix}$$
+                                    Next, I determined Tss' which is a pure rotation.
+                                    $$T_{ss'} = \begin{bmatrix} \cos{\dot{&theta;}} & -\sin{\dot{&theta;}} & 0 \\ \sin{\dot{&theta;}} & \cos{\dot{&theta;}} & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+                                    The last piece was determining \(T_{s'b'}\).
+                                    Because frame {s} is the center of rotation between frame {b} and frame {b'}, we can think of frame {s} as the center of a circle with frames {b} and {b'} on the circle's circumference.
+                                    Because frame {s} is oriented with {b} and frame {s'} is oriented with {b'}, \(T_{bs} = T_{s'b'}\). Finally, to solve for \(T_{bb'}\) we can use the following equation.
+                                    $$T_{bb'} = T_{bs}T_{ss'}T_{s'b'}$$
+                                    Now that we characterized all robotic movements, we need to track the robot. This step is simple. 
+                                    \(T_{wb}\) is the transformation from the world frame to the robot. 
+                                    \(T_{bb'}\) is calculated everytime the robot moves. 
+                                    To update the robots location, I used the following equation everytime the robot moved.
+                                    $$T_{wb'} = T_{wb}T_{bb'}$$
+                                    $$T_{wb} = T_{wb'}$$
+                                    -insert odometry experiments-
 								</p>
 
 								<h2>SLAM in Simulation</h2>
-								<p>
+								<p>At this point in the project, I am able to teleoperate the TurtleBot and accurately track its location. 
+                                    This is the framework for the real challenge in this project, SLAM using and Extended Kalman Filter (EKF). 
+                                    To simplify the SLAM problem, I am using 10 cylindrical landmarks of equal radius. 
+                                    I will use these landmarks for robot localization. 
+                                    The robot will only be trained to use these landmarks in the EKF. 
+                                </p>
+                                <img class="image center" src="images/SLAM/SLAM_Pipeline.svg" alt="" />
+                                <div class="align center">
+                                    <p class="image center"><b>Figure x.</b> 
+                                        SLAM pipeline. Lidar data is the input. 
+                                        Circle regression determines which data are landmarks. 
+                                        Data association matches circles found in the lidar data with initialized landmarks from SLAM. 
+                                        The associated data is then used the refine the SLAM estimate.
+                                    </p>
+                                </div>
+                                <p>To simplify the software developement required for SLAM. I started with SLAM in Simulation.
+                                    This allowed me to develop and test the EKF prior to attempting circle regression and data association.
                                 </p>
 
 								<h2>Future Work</h2>
