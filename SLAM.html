@@ -57,13 +57,13 @@
                                     <p>Wrote all software for differential drive with (dead reckoning) odometry. Then, implemented an extended kalman filter for SLAM.</p>
                                 </header>
                                 
-                                <div class="image main"><img src="images/SLAM/slam_cropped.png" alt="" /></div>
+                                <div class="image main"><img src="images/SLAM/apollo.jpg" alt="" style="max-width: 80%"/></div>
                                 
 								<h2>Overview</h2>
 								<p> In this project, I took a Turtlebot3 Burger and removed all the preinstalled ROS software. 
                                     Then, I wrote, tested, and implemented my own C++ scripts for 2D transformations, differential drive, odometry, and SLAM. 
                                     This project served as a learning experience in ROS/C++ and demonstrates my knowledge of robotic software development.
-                                    The only robotic software in this project that I did not code myself is the C code controlling the motors and lidar.<br/>
+                                    The only robotic software in this project that I did not code myself is the microcontroller level C code.<br/>
                                 </p>
 
                                 <h2>Setup</h2>
@@ -98,7 +98,7 @@
                                 </p>
                                     <img class="image center" src="images/SLAM/kinematics.jpg" alt="" style="max-width: 30%"/><br/>
                                     <div class="align center">
-                                        <p class="image center"><b>Figure 1.</b> 
+                                        <p class="image center"><b>Figure 2.</b> 
                                             Reference frames for TurtleBot. X axes are in red and y axes are in greed. 
                                             Frame b is the body, r is the right wheel, and l is the left wheel.
                                         </p>
@@ -276,7 +276,7 @@
                                 </p>
                                 <img class="image center" src="images/SLAM/SLAM_Pipeline.svg" alt="" style="max-width: 60%"/>
                                 <div class="align center">
-                                    <p class="image center"><b>Figure x.</b> 
+                                    <p class="image center"><b>Figure 8.</b> 
                                         SLAM pipeline. Lidar data is the input. 
                                         Circle regression determines which data are landmarks. 
                                         Data association matches circles found in the lidar data with initialized landmarks from SLAM. 
@@ -296,6 +296,15 @@
                                     By adding gaussian noise to the ground truth landmark locations I was able to simulate the lidar data, circle regression, and data association in the SLAM pipeline. 
                                     All of the simulation setup was done in a <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nurtlesim/src/tube_world.cpp" target="_blank">ROS node named tube_world</a>.
                                 </p>
+                                <img class="image center" src="images/SLAM/tube_world.png" alt="" style="max-width: 80%"/>
+                                <div class="align center">
+                                    <p class="image center"><b>Figure 9.</b> 
+                                        SLAM simulation environment. The yellow cylinders are the landmarks. The red cylinders are the landmark locations with noise. 
+                                        Some yellow cylinders do not have a red counterpart because they are too far from the robot for the robot to sense. 
+                                        The green path following the stray axis is the ground truth location of the robot. 
+                                        This is different than where the robot appears in the simulation due to wheel slip. 
+                                    </p>
+                                </div><br/>
                                 <h4>EKF SLAM Implementation</h4>
                                 <p>With my simulation setup, I needed to use the noisy landmark locations to localize the robot in the simulation.
                                     By tracking the robot's ground truth location, odometry location, and SLAM location, as the robot moved in the environment I would be able to assess whether or not the algorithm was working.
@@ -384,6 +393,25 @@
                                     I wrote a <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nuslam/src/slam.cpp" target="_blank">ROS node called slam</a> 
                                     that subscribes to the calculated odometry and noisy landmark data then implements an EKF to localize the robot.
                                 </p>
+                                <img class="image center" src="images/SLAM/slam_start.gif" alt="" style="max-width: 60%"/>
+                                <div class="align center">
+                                    <p class="image center"><b>Figure 10.</b> 
+                                        SLAM simulation in progress. The yellow cylinders are the landmarks.
+                                        The green path following the stray axis is the ground truth location of the robot.
+                                        The red path shows the SLAM estimate of the robot's location 
+                                        The purple path shows the odometry estimate of the robot's location. 
+                                    </p>
+                                </div><br/>
+                                <img class="image center" src="images/SLAM/slam_cropped.png" alt="" style="max-width: 60%"/>
+                                <div class="align center">
+                                    <p class="image center"><b>Figure 11.</b> 
+                                        Result of SLAM simulation shown in figure 11. The yellow cylinders are the landmarks.
+                                        The green path shows the ground truth location of the robot.
+                                        The red path shows the SLAM estimate of the robot's location 
+                                        The purple path shows the odometry estimate of the robot's location. 
+                                        Results demonstrate that the SLAM algorithm is more accurate than odometry.
+                                    </p>
+                                </div><br/>
                                 <h2>Circle Regression</h2>
                                 <p>With SLAM working in simulation, I moved onto circle regression. 
                                     The Turtlebot lidar gives range and bearing of obstactles in the environment. 
@@ -403,14 +431,19 @@
                                     The math for line-line intersection is basic algebra, so I will not go into the details.
                                     These function were used to create fake lidar data. 
                                     I implemented a publisher with the fake lidar data in the 
-                                    <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nurtlesim/src/tube_world.cpp#L363" target="_blank">tube_world ROS node</a>.<br/>
-                                    -instert gif of fake lidar data-<br/>
+                                    <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nurtlesim/src/tube_world.cpp#L363" target="_blank">tube_world ROS node</a>. 
                                     With the fake data, I then designed and implemented a clustering algorithm in a 
                                     <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nuslam/src/landmarks.cpp" target="_blank">ROS node titled landmarks</a>.
-                                    This allowed the robot to discern a landmark from a wall.<br/>
-                                    -insert gif of cluster-
+                                    This help the robot identify landmarks from the lidar data.
                                 </p>
-
+                                <img class="image center" src="images/SLAM/fake_lidar.gif" alt="" style="max-width: 60%"/>
+                                <div class="align center">
+                                    <p class="image center"><b>Figure 12.</b> 
+                                        Demonstration of the fake lidar data. Lidar readings accumulate around landmarks and at walls.
+                                        Notice that ocluded landmarks are undetected.
+                                        Lidar has a set range, so distant landmarks/walls are also undetected.
+                                    </p>
+                                </div><br/>
 								<h2>Next Steps</h2>
 								<p>Unfortunately, I no longer have access to a TurtleBot. My pipeline is near complete, and I plan to finish it when I can.
                                     The next step would be to associate the detected circles with landmarks in the SLAM algorithm.
