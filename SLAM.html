@@ -88,7 +88,7 @@
                                     This means to control the robot, I needed to calculate the wheel velocities that achieve the desired twist. 
                                     I used the following diagram to derive the relationship between wheel velocities and body twist.
                                 </p>
-                                    <img class="image center" src="images/SLAM/kinematics.jpg" alt="" /><br/>
+                                    <img class="image center" src="images/SLAM/kinematics.jpg" alt="" style="max-width: 30%"/><br/>
                                     <div class="align center">
                                         <p class="image center"><b>Figure 1.</b> 
                                             Reference frames for TurtleBot. X axes are in red and y axes are in greed. 
@@ -97,23 +97,23 @@
                                     </div>
                                 <p>
                                     To start the derivation, I wrote the transformation matricies from the body to the wheels.<br/>
-                                    $$T_{bl} = \begin{bmatrix} 1 & 0 & 0\\ 0 & 1 & D \\ 0 & 0 & 1 \end{bmatrix} \hspace{10mm}
+                                    $$T_{bl} = \begin{bmatrix} 1 & 0 & 0\\ 0 & 1 & D \\ 0 & 0 & 1 \end{bmatrix} \hspace{20mm}
                                     T_{br} = \begin{bmatrix} 1 & 0 & 0\\ 0 & 1 & -D \\ 0 & 0 & 1 \end{bmatrix}$$
 
                                     Then, I wrote the adjoint matricies between the body and wheels.<br/>
-                                    $$A_{bl} = \begin{bmatrix} 1 & 0 & 0\\ D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} \hspace{10mm}
+                                    $$A_{bl} = \begin{bmatrix} 1 & 0 & 0\\ D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} \hspace{20mm}
                                     A_{br} = \begin{bmatrix} 1 & 0 & 0\\ -D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
-                                    $$A_{lb} = \begin{bmatrix} 1 & 0 & 0\\ -D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} \hspace{10mm}
+                                    $$A_{lb} = \begin{bmatrix} 1 & 0 & 0\\ -D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} \hspace{20mm}
                                     A_{rb} = \begin{bmatrix} 1 & 0 & 0\\ D & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
 
                                     The following equation is used to relate twist in the wheel frame to the control.<br/>
-                                    $$\begin{bmatrix} \dot{x_i} \\ \dot{y_i} \end{bmatrix} = \begin{bmatrix} r\dot{&phi;}_i \\ 0 \end{bmatrix}$$
+                                    $$\begin{equation} \begin{bmatrix} \dot{x_i} \\ \dot{y_i} \end{bmatrix} = \begin{bmatrix} r\dot{&phi;}_i \\ 0 \end{bmatrix} \end{equation}$$
                                     r is the wheel radius<br/>
                                     \(\dot{&phi;}\) is the rotational velocity<br/>
                                     i is the wheel (l or r in this case)<br/><br/>
 
                                     Now, I can rewrite the body twist in the wheel frames.<br/>
-                                    $$V_b = \begin{bmatrix} \dot{&theta;} \\ \dot{x} \\ \dot{y} \end{bmatrix} \hspace{10mm}
+                                    $$V_b = \begin{bmatrix} \dot{&theta;} \\ \dot{x} \\ \dot{y} \end{bmatrix} \hspace{20mm}
                                     V_i = \begin{bmatrix} \dot{&theta;} \\ r\dot{&phi;}_i \\ 0 \end{bmatrix}$$
 
                                     Since I am calculating controls, I want to solve for \(\dot{&phi;}_i\) in terms of D, r, \(\dot{&theta;}\), and \(\dot{x}\). 
@@ -146,24 +146,28 @@
                                     Since I typically drive the Turtlebot on a wood floor with good traction, this was the obvious choice.
                                     The first step to dead reckoning is obtaining the angular velocities of the wheels.
                                     Using the wheel encoders, I was able to measure the the angular velocities.
-                                    Then I calculated the body twist by rearranging equations (1) and (2).
-                                    $$V_b = \begin{bmatrix} \dot{&theta;} \\ \dot{x} \\ \dot{y} \end{bmatrix} = 
-                                    \begin{bmatrix} \frac{r(\dot{&phi;}_r-\dot{&phi;}_l)}{2D} \\ \frac{r(\dot{&phi;}_r+\dot{&phi;}_l)}{2} \\ 0 \end{bmatrix}$$
+                                    Then I calculated the body twist by rearranging equations (2) and (3).
+
+                                    $$\begin{equation} V_b = \begin{bmatrix} \dot{&theta;} \\ \dot{x} \\ \dot{y} \end{bmatrix} = 
+                                    \begin{bmatrix} \frac{r(\dot{&phi;}_r-\dot{&phi;}_l)}{2D} \\ \frac{r(\dot{&phi;}_r+\dot{&phi;}_l)}{2} \\ 0 \end{bmatrix} \end{equation}$$
+                                    
                                     The next step is integrating the twist \(V_b\) to find the change in position and orientation \(T_{bb'}\) where {b} is the original body frame and {b'} is the body frame after movement. 
                                     You could do this using matrix exponentials, but that is computationally expensive. 
                                     In 2D, there are more efficient methods. 
                                     When integrating the twist in 2D, there are two scenarios.<br/><br/>
+                                    
                                     <b>Sceneraio 1: Translation without Rotation</b><br/>
                                     In the case \(V_b\) has no rotational component, \(T_{bb'}\) is a pure translation determined by the twist.
-                                    $$V_b = \begin{bmatrix} 0 \\ \dot{x} \\ \dot{y} \end{bmatrix} \hspace{10mm}
+                                    $$V_b = \begin{bmatrix} 0 \\ \dot{x} \\ \dot{y} \end{bmatrix} \hspace{20mm}
                                     T_{bb'} = \begin{bmatrix} 1 & 0 & \dot{x}\\ 0 & 1 & \dot{y} \\ 0 & 0 & 1 \end{bmatrix}$$
+                                    
                                     <b>Scenario 2: Translation with Rotation</b><br/>
                                     In the case \(V_b\) has translational and rotational comopnents, the math gets more complicated.
                                     For any two unit vectors (vector a and vector b) on a plane, there is a pure rotation that transforms vector a to vector b.
                                     Finding the center of rotation in the frame aligned with {b} is the first step to integrate the twist. 
                                     I will refer to frame {s} as the frame at the center of rotation in the orientation of frame {b}.
                                     I will refer to frame {s'} as the frame at the center of rotation in the orientation of frame {b'}.
-                                    I determined the location of frame {s} using the adjoint. 
+                                    I determined the location of frame {s} using the adjoint.                                     
                                     $$\begin{bmatrix} 1 & 0 & 0\\ y_{s} & 1 & 0 \\ -x_{s} & 0 & 1 \end{bmatrix}
                                     \begin{bmatrix} &Delta; &theta; \\ &Delta; x_{b} \\ &Delta; y_{b} \end{bmatrix} = 
                                     \begin{bmatrix} \dot{&theta;} \\ 0 \\ 0 \end{bmatrix}$$
@@ -174,12 +178,12 @@
                                     The last piece was determining \(T_{s'b'}\).
                                     Because frame {s} is the center of rotation between frame {b} and frame {b'}, we can think of frame {s} as the center of a circle with frames {b} and {b'} on the circle's circumference.
                                     Because frame {s} is oriented with {b} and frame {s'} is oriented with {b'}, \(T_{bs} = T_{s'b'}\). Finally, to solve for \(T_{bb'}\) we can use the following equation.
-                                    $$T_{bb'} = T_{bs}T_{ss'}T_{s'b'}$$
+                                    $$\begin{equation} T_{bb'} = T_{bs}T_{ss'}T_{s'b'} \end{equation}$$
                                     Now that we characterized all robotic movements, we need to track the robot. This step is simple. 
                                     \(T_{wb}\) is the transformation from the world frame to the robot. 
                                     \(T_{bb'}\) is calculated everytime the robot moves. 
                                     To update the robots location, I used the following equation everytime the robot moved.
-                                    $$T_{wb'} = T_{wb}T_{bb'}$$
+                                    $$\begin{equation} T_{wb'} = T_{wb}T_{bb'} \end{equation}$$
                                     $$T_{wb} = T_{wb'}$$
                                     -insert odometry experiments-
 								</p>
@@ -189,9 +193,9 @@
                                     This is the framework for the real challenge in this project, SLAM using and Extended Kalman Filter (EKF). 
                                     To simplify the SLAM problem, I am using 10 cylindrical landmarks of equal radius. 
                                     I will use these landmarks for robot localization. 
-                                    The robot will only be trained to use these landmarks in the EKF. 
+                                    The robot will only be trained to regonize and use these landmarks in the EKF. 
                                 </p>
-                                <img class="image center" src="images/SLAM/SLAM_Pipeline.svg" alt="" />
+                                <img class="image center" src="images/SLAM/SLAM_Pipeline.svg" alt="" style="max-width: 60%"/>
                                 <div class="align center">
                                     <p class="image center"><b>Figure x.</b> 
                                         SLAM pipeline. Lidar data is the input. 
@@ -200,8 +204,100 @@
                                         The associated data is then used the refine the SLAM estimate.
                                     </p>
                                 </div>
-                                <p>To simplify the software developement required for SLAM. I started with SLAM in Simulation.
+                                <p><br/>To simplify the software developement required for thie pipeline. I started with SLAM in Simulation.
                                     This allowed me to develop and test the EKF prior to attempting circle regression and data association.
+                                </p>
+                                <h4>Simulation Setup</h4>
+                                <p>Currently in simluation, the odometry data gives me the ground truth location of the robot. 
+                                    This makes SLAM useless. 
+                                    I needed to add noise to my simulation to make it more like the real world. 
+                                    I added gaussian noise to the commanded twist and introduced slip to the wheel angels.
+                                    This made my odometry data less accurate, as the robot moved. 
+                                    Next, I added cylinders to the simulation environment to represent to landmarks.
+                                    By adding gaussian noise to the ground truth landmark locations I was able to simulate the lidar data, circle regression, and data association in the SLAM pipeline. 
+                                </p>
+                                <h4>EKF SLAM Implementation</h4>
+                                <p>With my simulation setup, I needed to use the noisy landmark locations to localize the robot in the simulation.
+                                    By tracking the robot's ground truth location, odometry location, and SLAM location, as the robot moved in the environment I would be able to assess whether or not the algorithm was working.
+                                    I split the algorithm into 3 parts.<br/><br/>
+
+                                    <b>Initialization</b><br/>
+                                    I started intializing the state of the environment.
+                                    $$q_{t} = \begin{bmatrix} &theta; \\ x \\ y \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix} \hspace{20mm} 
+                                    m_{t} = \begin{bmatrix} m_{{x}_{1}} \\ m_{{x}_{1}} \\ \textrm{...} \\ m_{{x}_{n}} \\ m_{{y}_{n}} \end{bmatrix} = 
+                                    \begin{bmatrix} 0_{2n \textrm{ x } 1} \end{bmatrix} \hspace{20mm} 
+                                    &xi;_{t} = g(&xi;_{t-1},u_{t},w_{t}) = \begin{bmatrix} q_{t} \\ m_{t} \end{bmatrix} = \begin{bmatrix} 0_{2n+3 \textrm{ x } 1} \end{bmatrix}$$
+                                    \(q_{t}\) is the current robot state estimate<br/>
+                                    \(m_{t}\) is the current landmark state estimate<br/>
+                                    \(n\) is the max number of landmarks<br/>
+                                    \(&xi;_{t}\) is the current state estimate of the entire environment<br/>
+                                    \(g(&xi;_{t-1},u_{t},w_{t})\) is a transition function modeling the robot and map's movement<br/>
+                                    \(u_{t}\) is the odometry model derived in the previous section<br/>
+                                    \(w_{t}\) is the process noise in the system<br/><br/>
+
+
+                                    Then, I initialized the state covariance matrix.
+                                    $$&Sigma;_{0} = \begin{bmatrix} &Sigma;_{0,q} & 0_{3 \textrm{x} 2n} \\ 0_{2n \textrm{x} 3} & &Sigma;_{0,m} \end{bmatrix}$$
+                                    \(&Sigma;_{0,q} \in \mathbb{R}^{3 \textrm{x} 3}\) is the covariance of the robot state<br/>
+                                    \(&Sigma;_{0,m} \in \mathbb{R}^{2n \textrm{x} 2n}\) is the covariance of the landmark state matrix<br/><br/>
+                                    \(&Sigma;_{0,q}\) was initialized to all zeros because the initial state of the robot is known.
+                                    \(&Sigma;_{0,m}\) was initialized as a diagonal matrix with infinity on the diagonal because the landmark locations are unknown to the robot. 
+                                    Lastly, I initialized the noise covariance matricies. These covariance matricies are parameters that can be tuned for better SLAM results.
+                                    $$Q = \begin{bmatrix} 0.1 & 0 & 0 \\ 0 & 0.1 & 0 \\ 0 & 0 & 0.1 \end{bmatrix} \hspace{20mm}
+                                    \bar{Q} = \begin{bmatrix} Q & 0_{3 \textrm{x} 2n} \\ 0_{2n \textrm{x} 3} & 0_{2n \textrm{x} 2n} \end{bmatrix} \hspace{20mm}
+                                    R = \begin{bmatrix} 0.1 & 0 \\ 0 & 0.1 \end{bmatrix}$$
+                                    Q is the process noise covariance matrix<br/>
+                                    \(\bar{Q}\) is the process noise expanded to fill the whole state<br/>
+                                    R is the sensor noise covariance matrix<br/><br/>
+
+                                    <b>Predicition</b><br/>
+                                    The first step to predicition is updating the state estimate using odometry.
+                                    $$\begin{equation} &xi;^{-}_{t} = g(&xi;_{t-1},u_{t},0) \end{equation}$$
+                                    Then, propagate the uncertainty using the linearized state transition model.
+                                    $$\begin{equation} &Sigma;^{-}_{t} = A_{t}&Sigma;_{t-1}A^{T}_{t}+\bar{Q} \end{equation}$$
+                                    The EKF uses a state transition model, \(g(&xi;_{t-1},u_{t},0)\), that is linearized about the current state estimate. 
+                                    In equation (3), \(A_{t}\) is the deviative g with respect to the state, \(g'(&xi;_{t-1},u_{t},0)\), used in the linearization. 
+                                    \(A_{t}\) has two equations.<br/><br/>
+                                    No Rotation:<br/>
+                                    $$\begin{equation} A_{t} = g'(&xi;_{t-1},u_{t},0) = I + 
+                                    \begin{bmatrix} P_{1} & 0_{3 \textrm{x} 2n} \\ 0_{2n \textrm{x} 3} & 0_{2n \textrm{x} 2n} \end{bmatrix} \end{equation}$$
+                                    $$P_{1} = \begin{bmatrix} 0 & 0 & 0 \\ -&Delta;x_{t}\sin(&theta;_{t-1}) & 0 & 0 \\ &Delta;x_{t}\cos(&theta;_{t-1}) & 0 & 0 \end{bmatrix}$$
+                                    Rotation:<br/>
+                                    $$\begin{equation} A_{t} = g'(&xi;_{t-1},u_{t},0) = I + 
+                                    \begin{bmatrix} P_{2} & 0_{3 \textrm{x} 2n} \\ 0_{2n \textrm{x} 3} & 0_{2n \textrm{x} 2n} \end{bmatrix}\end{equation}$$
+                                    $$P_{2} = \begin{bmatrix} 0 & 0 & 0 \\ 
+                                    -\frac{&Delta;x_{t}}{&Delta;&theta;_{t}}\cos(&theta;_{t-1})+\frac{&Delta;x_{t}}{&Delta;&theta;_{t}}\cos(&theta;_{t-1}+&Delta;&theta;_{t}) & 0 & 0 \\ 
+                                    -\frac{&Delta;x_{t}}{&Delta;&theta;_{t}}\sin(&theta;_{t-1})+\frac{&Delta;x_{t}}{&Delta;&theta;_{t}}\sin(&theta;_{t-1}+&Delta;&theta;_{t}) & 0 & 0 \end{bmatrix}$$
+                                    
+                                    
+                                    <br/><b>Update</b><br/>
+                                    The update step of the EKF is a loop for each measurement.
+                                    In this explanation, we will refer to the measurement as i and the associated landmark as j.<br/><br/>
+
+                                    1) Calculate the theoretical measurement using the current state estimate.
+                                    $$\begin{equation} \hat{z}^{i}_{t} = h_{j}(&xi;^{-}_{t}) \end{equation}$$
+                                    $$h_{j}(&xi;^{-}_{t}) = \begin{bmatrix} \sqrt{(m_{x,j}-x_{t})^{2}+(m_{y,j}-y_{t})^{2}} \\ \textrm{atan2}(m_{y,j}-y_{t},m_{x,j}-x_{t})-&theta;_{t} \end{bmatrix}$$
+                                    \(\hat{z}^{i}_{t}\) is the theoretical range and bearing from the robot to landmark<br/><br/>
+                                    
+                                    2) Calculate the Kalman gain using the linearized measurement model.
+                                    $$\begin{equation} K_{i} = &Sigma;^{-}_{t}H^{T}_{j}(H_{j}&Sigma;^{-}_{t}H^{T}_{j}+R)^{-1} \end{equation}$$
+                                    $$H_{j} = h_{j}'(&xi;^{-}_{t}) = 
+                                    \begin{bmatrix} 0 & \frac{-&delta;_{x}}{\sqrt{d}} & \frac{-&delta;_{y}}{\sqrt{d}} & 0_{1 \textrm{ x } 2(j-1)} & \frac{&delta;_{x}}{\sqrt{d}} & \frac{&delta;_{y}}{\sqrt{d}} & 0_{1 \textrm{ x } 2n-2j} \\ 
+                                    -1 & \frac{&delta;_{y}}{d} & \frac{-&delta;_{x}}{d} & 0_{1 \textrm{ x } 2(j-1)} & \frac{-&delta;_{y}}{d} & \frac{&delta;_{x}}{d} & 0_{1 \textrm{ x } 2n-2j} \end{bmatrix}$$
+                                    $$&delta;_{x} = m_{x,j}-x_{t}$$
+                                    $$&delta;_{y} = m_{y,j}-y_{t}$$
+                                    $$d = &delta;_{x}^2+&delta;_{y}^2$$<br/><br/>
+
+                                    3) Calculate the posterior state update
+                                    $$\begin{equation} &xi;_{t} = &xi;^{-}_{t}+K_{i}(z^{i}_{t}-\hat{z}^{i}_{t}) \end{equation}$$
+                                    \(z^{i}_{t}\) is the measured range and bearing from the robot to landmark<br/><br/>
+
+                                    4) Calculate the posterior covariance
+                                    $$ \begin{equation} &Sigma;_{t} = (I-K_{i}H_{j})&Sigma;^{-}_{t} \end{equation} $$
+
+                                    5) Update state and covariance for next measurement (i)
+                                    $$ &Sigma;_{t}^{-} = &Sigma;_{t} $$
+                                    $$ &xi;_{t}^{-} = &xi;_{t} $$
                                 </p>
 
 								<h2>Future Work</h2>
