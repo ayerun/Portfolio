@@ -64,23 +64,31 @@
                                     Then, I wrote, tested, and implemented my own C++ scripts for 2D transformations, differential drive, odometry, and SLAM. 
                                     This project served as a learning experience in ROS/C++ and demonstrates my knowledge of robotic software development.
                                     The only robotic software in this project that I did not code myself is the C code controlling the motors and lidar.<br/>
-                                    -insert gif of turtlebot-
                                 </p>
 
                                 <h2>Setup</h2>
                                 <h4>Robot Visualization</h4>
-                                <p> I started this project by creating a ROS package (-insert link-) for robot visualization in Rviz. 
+                                <p> I started this project by creating a 
+                                    <a href="https://github.com/ayerun/SLAM_From_Scratch/tree/master/nuturtle_description" target="_blank">ROS package for robot visualization</a> 
+                                    in Rviz. 
                                     This was the first step in the simulation process. 
                                     It was imperative to test my software in simulation prior to deploying new features onto the physical robot. 
                                     The controlled simulation environment simplifies the process of finding a correcting errors in my code. 
                                     This ROS package utilizes the URDF files written by the TurtleBot manufacturer to display the Robot in Rviz.<br/>
-                                    -insert rviz pic-
                                 </p>
+                                <img class="image center" src="images/SLAM/rviz.png" alt="" style="max-width: 60%"/><br/>
+                                <div class="align center">
+                                    <p class="image center"><b>Figure 1.</b> 
+                                        Turtlebot visualization in Rviz. Image also shows the reference frames within the robot.
+                                    </p>
+                                </div><br/>
 								<h4>2D Tranformations</h4>
-                                <p> Due to the math involved in differential drive and odometry, I decided to write a C++ library (-insert rigid2d link-) for 2D transformations. 
+                                <p> Due to the math involved in differential drive and odometry, I decided to write a 
+                                    <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/rigid2d/include/rigid2d/rigid2d.hpp" target="_blank">C++ library for 2D transformations</a>. 
                                     The library provides data structures for 2D transformations, vectors, and twists.
                                     I wrote standard operator overload methods for addition, subtraction, and multiplication as well as methods for applying transformations to vectors and twists.
-                                    The library was heavily tested (-insert link-). It serves as the backbone to all the software a created from this point.
+                                    The library was <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/rigid2d/test/test.cpp" target="_blank">heavily tested</a>. 
+                                    It serves as the backbone to all the software a created from this point.
 								</p>
 
 								<h2>Kinematics</h2>
@@ -130,11 +138,17 @@
                                     \begin{bmatrix} \dot{&theta;} \\ \dot{x} \\ \dot{y} \end{bmatrix}$$
                                     $$\begin{equation} \mathbf{\dot{&phi;}_r = \frac{D\dot{&theta;}+\dot{x}}{r}} \end{equation}$$
 
-                                    With the rigid2d library, I implemented the kinematics for differential drive in a class called diff_drive (-insert link-).
-                                    I wrote a ROS node called fake_turtle (-insert link-) that converts body velocities to wheel controls the publishes the controls.
+                                    With the rigid2d library, I implemented the kinematics for differential drive in a <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/rigid2d/include/rigid2d/diff_drive.hpp" target="_blank">class called diff_drive</a>.
+                                    I wrote a <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/rigid2d/src/fake_turtle.cpp" target="_blank">ROS node called fake_turtle</a> 
+                                    that converts body velocities to wheel controls the publishes the controls.
                                     This allowed me to visualize the code in Rviz.
-                                    (-insert gif of wheels moving-)
                                 </p>
+                                <img class="image center" src="images/SLAM/kinematics.gif" alt="" style="max-width: 60%"/><br/>
+                                <div class="align center">
+                                    <p class="image center"><b>Figure 3.</b> 
+                                        Robot kinematics demostrated in simulation. Kinematics enable robot to move with translation and/or rotation.
+                                    </p>
+                                </div><br/>
                                 
                                 <h2>Odometry</h2>
                                 <p> To make the robot move in simulation, I needed to implement odometry. 
@@ -185,15 +199,80 @@
                                     To update the robots location, I used the following equation everytime the robot moved.
                                     $$\begin{equation} T_{wb'} = T_{wb}T_{bb'} \end{equation}$$
                                     $$T_{wb} = T_{wb'}$$
-                                    -insert odometry experiments-
-								</p>
+                                    The C++ implementation for the integrate twist function can be found 
+                                    <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/d0af095029a78d3662688a002bc2ca2ebbace7a8/rigid2d/src/rigid2d.cpp#L378" target="_blank">here</a>. 
+                                    Once all the math for odometry was implemented, I wrote a 
+                                    <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/rigid2d/src/odometer.cpp" target="_blank">ROS node called odometer</a> 
+                                    that calculates and publishes odometry using the robot joint states. 
+                                    This enabled the robot to move around the Rviz simulation environment.<br/>
+                                </p>
+                                <h4>Odometry Experiments</h4>
+                                <p>I performed experiments using the physical robot to ensure my calculations were accurate.
+                                    All experiments were executed via teleoperation.<br/><br/>
+                                    <b>Experiment 1 (Pure Translation): </b><br/>
+                                    Drive robot forward and backward in straight line. Stop at initial configuration. Record odometry values.
+                                </p>
+                                <img class="image center" src="images/SLAM/experiment1.gif" alt="" style="max-width: 60%"/><br/>
+                                <div class="align center">
+                                    <p class="image center"><b>Figure 4.</b> 
+                                        Video of experiment 1 in progress.
+                                    </p>
+                                </div><br/>
+                                <p><u>Results</u><br/>
+                                    x = 0.0302 m<br/>
+                                    y = 0.0165 m<br/>
+                                    \(&theta;\) = 0.000600 rad<br/><br/>
+
+                                    <b>Experiment 2 (Pure Rotation): </b><br/>
+                                    Drive robot in place clockwise and counter clockwise. Stop at initial configuration. Record odometry values.
+                                </p>
+                                <img class="image center" src="images/SLAM/experiment2.gif" alt="" style="max-width: 60%"/><br/>
+                                <div class="align center">
+                                    <p class="image center"><b>Figure 5.</b> 
+                                        Video of experiment 2 in progress.
+                                    </p>
+                                </div><br/>
+                                <p><u>Results</u><br/>
+                                    x = 0.0000445 m<br/>
+                                    y = -0.0000181 m<br/>
+                                    \(&theta;\) = 0.180 rad<br/><br/>
+
+                                    <b>Experiment 3 (Translation & Rotation): </b><br/>
+                                    Drive robot in circle clockwise and counter clockwise. Stop at initial configuration. Record odometry values.
+                                </p>
+                                <img class="image center" src="images/SLAM/experiment3.gif" alt="" style="max-width: 60%"/><br/>
+                                <div class="align center">
+                                    <p class="image center"><b>Figure 6.</b> 
+                                        Video of experiment 3 in progress.
+                                    </p>
+                                </div><br/>
+                                <p><u>Results</u><br/>
+                                    x = -0.0290 m<br/>
+                                    y = 0.0633 m<br/>
+                                    \(&theta;\) = 0.398 rad<br/><br/>
+
+                                    <b>Experiment 4 (Translation & Rotation): </b><br/>
+                                    Drive robot in circle clockwise and counter clockwise. Stop at initial configuration. Record odometry values.
+                                    This is the same as experiment 3 but the robot is moving significantly faster and the circle radius is larger.
+                                </p>
+                                <img class="image center" src="images/SLAM/experiment4.gif" alt="" style="max-width: 60%"/><br/>
+                                <div class="align center">
+                                    <p class="image center"><b>Figure 7.</b> 
+                                        Video of experiment 4 in progress.
+                                    </p>
+                                </div><br/>
+                                <p><u>Results</u><br/>
+                                    x = -0.282 m<br/>
+                                    y = 0.205 m<br/>
+                                    \(&theta;\) = 1.74 rad<br/><br/>
+                                </p>
 
 								<h2>SLAM in Simulation</h2>
 								<p>At this point in the project, I am able to teleoperate the TurtleBot and accurately track its location. 
                                     This is the framework for the real challenge in this project, SLAM using and Extended Kalman Filter (EKF). 
                                     To simplify the SLAM problem, I am using 10 cylindrical landmarks of equal radius. 
                                     I will use these landmarks for robot localization. 
-                                    The robot will only be trained to regonize and use these landmarks in the EKF. 
+                                    The robot will only be trained to recognize and use these landmarks in the EKF. 
                                 </p>
                                 <img class="image center" src="images/SLAM/SLAM_Pipeline.svg" alt="" style="max-width: 60%"/>
                                 <div class="align center">
@@ -204,7 +283,7 @@
                                         The associated data is then used the refine the SLAM estimate.
                                     </p>
                                 </div>
-                                <p><br/>To simplify the software developement required for thie pipeline. I started with SLAM in Simulation.
+                                <p><br/>To simplify the software developement required for thie pipeline. I started with SLAM in simulation.
                                     This allowed me to develop and test the EKF prior to attempting circle regression and data association.
                                 </p>
                                 <h4>Simulation Setup</h4>
@@ -215,11 +294,13 @@
                                     This made my odometry data less accurate, as the robot moved. 
                                     Next, I added cylinders to the simulation environment to represent to landmarks.
                                     By adding gaussian noise to the ground truth landmark locations I was able to simulate the lidar data, circle regression, and data association in the SLAM pipeline. 
+                                    All of the simulation setup was done in a <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nurtlesim/src/tube_world.cpp" target="_blank">ROS node named tube_world</a>.
                                 </p>
                                 <h4>EKF SLAM Implementation</h4>
                                 <p>With my simulation setup, I needed to use the noisy landmark locations to localize the robot in the simulation.
                                     By tracking the robot's ground truth location, odometry location, and SLAM location, as the robot moved in the environment I would be able to assess whether or not the algorithm was working.
-                                    I split the algorithm into 3 parts.<br/><br/>
+                                    I split the algorithm into 3 parts and created a <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nuslam/include/nuslam/nuslam.hpp" target="_blank">C++ library named nuslam</a> 
+                                    with all the functions necessary for the EKF.<br/><br/>
 
                                     <b>Initialization</b><br/>
                                     I started intializing the state of the environment.
@@ -298,16 +379,49 @@
                                     5) Update state and covariance for next measurement (i)
                                     $$ &Sigma;_{t}^{-} = &Sigma;_{t} $$
                                     $$ &xi;_{t}^{-} = &xi;_{t} $$
+
+                                    With all this functionality in the <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nuslam/include/nuslam/nuslam.hpp" target="_blank">nuslam library</a>, 
+                                    I wrote a <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nuslam/src/slam.cpp" target="_blank">ROS node called slam</a> 
+                                    that subscribes to the calculated odometry and noisy landmark data then implements an EKF to localize the robot.
+                                </p>
+                                <h2>Circle Regression</h2>
+                                <p>With SLAM working in simulation, I moved onto circle regression. 
+                                    The Turtlebot lidar gives range and bearing of obstactles in the environment. 
+                                    Using this lidar data, I wanted to detect the tube obstactles because they are used as the landmarks in the SLAM algorithm.
+                                    Following the trend of this project, I implemented this in simulation prior to deploying on the real robot. 
+                                    This makes it easier to debug while developing. 
+                                    To implement this in simulation, I had to create fake lidar data.
+                                    This was more complicated than expected because <a href="http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html" target="_blank">ROS sensor_msgs/LaserScan</a> 
+                                    presents lidar data using an angle increment and time increment.
+                                    I imagined this as lines coming out of the robot at the specific angle increment. 
+                                    This meant I would have to intersect these lines with the tubes in the simulation environment to fake the lidar data. 
+                                    Also, to ensure my circle regression algorithm was working, I had to incorporate lidar data that was not tubes in the environment. 
+                                    To do this, I simulated a wall around the simulation environment.
+                                    I implemented functions for circle-line intersection and line-line intersection in a 
+                                    <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nuslam/include/nuslam/nuslam.hpp#L9" target="_blank">namespaced titled cl</a>.
+                                    The math for circle-line intersection is well described <a href="https://mathworld.wolfram.com/Circle-LineIntersection.html" target="_blank">here</a>. 
+                                    The math for line-line intersection is basic algebra, so I will not go into the details.
+                                    These function were used to create fake lidar data. 
+                                    I implemented a publisher with the fake lidar data in the 
+                                    <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nurtlesim/src/tube_world.cpp#L363" target="_blank">tube_world ROS node</a>.<br/>
+                                    -instert gif of fake lidar data-<br/>
+                                    With the fake data, I then designed and implemented a clustering algorithm in a 
+                                    <a href="https://github.com/ayerun/SLAM_From_Scratch/blob/master/nuslam/src/landmarks.cpp" target="_blank">ROS node titled landmarks</a>.
+                                    This allowed the robot to discern a landmark from a wall.<br/>
+                                    -insert gif of cluster-
                                 </p>
 
 								<h2>Next Steps</h2>
 								<p>Unfortunately, I no longer have access to a TurtleBot. My pipeline is near complete, and I plan to finish it when I can.
-                                    I implemented circle regression here -insert link- . 
-                                    The next step would be to associate the found circles with landmarks in the SLAM algorithm.
-                                    Then, I would just need to test and debug using the physical TurleBot. 
+                                    The next step would be to associate the detected circles with landmarks in the SLAM algorithm.
+                                    I would do this by calculating the distances between the detected landmark and the SLAM state estimation of landmark locations.
+                                    If the shortest distance is below a defined threshold, I would associate the measurement with its closest landmark.
+                                    If the shortest distance is above the defined threshold, I would initialize a new landmark in the SLAM algorithm.
+                                    Then, I would just need to test, debug, and refine using the physical TurtleBot.
+                                    I should have access to TurtleBot near the end of 2021.
                                 </p>
 
-                                <h1><a href="https://github.com/ayerun/Robotic_3D_Scanner" target="_blank">-View Full Source Code-</a></h1>
+                                <h1><a href="https://github.com/ayerun/SLAM_From_Scratch" target="_blank">-View Full Source Code-</a></h1>
 							</section>
 
 					</div>
