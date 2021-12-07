@@ -1,0 +1,170 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>VR Haptics</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+        <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script type="text/javascript" id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+        </script>
+        <script>
+        window.MathJax = {
+            tex: {
+              tags: 'ams'
+            }
+          };
+        </script>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li class="active"><a href="index.html">Projects</a></li>
+							<li><a href="about.html">About</a></li>
+							<li><a href="contact.html">Contact</a></li>
+							<li><a href="Resume_Kumar.pdf" target="_blank" download>Resume</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="https://www.linkedin.com/in/arun-kumar-102197/" target="_blank" class="icon brands alt fa-linkedin"><span class="label">Linkedin</span></a></li>
+							<li><a href="https://github.com/ayerun" target="_blank" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<span class="date">March 2021 - December 2021</span>
+									<h1>Virtual Reality Haptics</h1>
+                                    <p>Created a haptic feedback system for the Valve Index</p>
+                                </header>
+                                
+                                <div class="image main"><img src="images/SLAM/apollo.jpg" alt="" style="max-width: 80%"/></div>
+                                
+								<h2>Overview</h2>
+								<p> This project is an exploration of force/torque feedback in human-robotic systems. 
+									VR prides itself on creating immersive environments. 
+									However, in current systems the immersion is only an audio-visual experience. 
+									Adding the sense of touch to VR systems can enable many more applications such as telerobotic surgery and something else.
+									VR haptic gloves are the first expansion into the tactile domain.
+									These gloves can resist finger motion.
+									This project is concerned with resisting hand and arm motion.
+                                </p>
+
+                                <h2>Initial Design</h2>
+								<p>In this project, we worked backwards from the end goal.
+									Our goal was to deliver force/torque feedback to user's arm.
+									We began by thinking about mechanical systems to could produce significant force/torques on the user's arms. 
+									Our plan was to use motor(s) to generate torque and use a linkage system to convert the torque into a force or torque felt on the user's hand.
+									The best way to visualize this is by imagining a robotic arm in which the user is holding the end effector.
+									Actuating the motors in the robotic arm, will extert torques/forces on the user's hand.
+									If this robotic arm is stationary in the room, the VR experience is confined to the arm's workspace.
+									If the robotic arm is attached to the user, the VR experience if fully mobile.
+									There are two main complications to this design.
+									The user must carry the weight of the robot, and 
+									the user's body must disperse the reaction forces (the base of the robot will exert forces on the user).
+									
+									From a software and controls standpoint, the primary constraint is the VR tracking frequency.
+									The maximum stiffness of a haptically rendered surface is proportional to the speed of the controller.
+									The Valve Index 2, comes with a state of the art tracking system, lighthouse 2. 
+									This tracking system provides data at 140 Hz.
+									The following is the primary question I researched during this project.
+									Given this bottleneck frequency, what surfaces can we haptically render?
+									The answer to this question is based in both engineering and human psychology.
+								</p>
+								<h2>Materials</h2>
+                                <h4>Hardware Selection</h4>
+                                <p> For this project, I am using a Valve Index 2 with the Vive Lighthouse 2.0 tracking system. 
+									I chose this setup because the Lighthouse 2.0 provides the fastest tracking on the market.
+									The other primary components I needed are motors, encoders, and a motor driver.
+									I started by searching for motors.
+
+                                </p>
+								<h4>Software Selection</h4>
+                                <p> It was difficult to select the software to use for this project.
+									Robots run on Linux whereas VR runs on Windows. 
+									Since this project, is at the intersection of robotics and VR it was difficult to decide which one to use.
+									I settled on using Linux for the following reasons. 
+									This project is primarily a robotic technology exploration not a VR technology exploration.
+									The robotics side of this project will be easier to build upon in the future if this foundation is built Linux.
+									Once the technology is no longer experimental, it will be trivial to port to Windows. 
+									The downside to using Linux, is that it is difficult to interact with the VR hardware.
+									Unity, the game engine, runs on Linux. However, the OpenXR plugin needed to interface with the headset depends on DirectX which is Windows exclusive. 
+									SteamVR runs on Linux, but the amount of bugs I encountered almost made me quit robotics all together.
+									I decided to keep hardware interaction at the bear minimum because VR hardware on Linux is so unreliable.
+									I repurposed an OpenXR example render pipeline for my own use.
+									This project focuses on the sense of touch, so for now I am not rendering anything to the VR headset. 
+									I am only using the VR setup and render pipeline for the controller tracking data.
+									The OpenXR API is for C++, so for simplicity and ease of use I did everything in C++.
+								</p>
+
+								<h2>Pipeline</h2>
+
+								<h2>1 Degree of Freedom</h2>
+								<h4>Encoder Feedback</h4>
+								<h4>Tracking Feedback</h4>
+								<p> 
+                                </p>
+
+                                <h2>2 Degrees of Freedom</h2>
+								<h4>Encoder Feedback</h4>
+								<h4>Tracking Feedback</h4>
+								<h4>Filtering</h4>
+								<h4>Audio pipeline</h4>
+								<p>
+                                </p>
+
+                                <h2>4 Degrees of Freedom</h2>
+								<h4>Linkage</h4>
+								<h4>Transforms</h4>
+								<p> 
+                                </p>
+
+                                <h2>Next Steps</h2>
+								<h4>Concurrency</h4>
+								<h4>4 Bar Linkage</h4>
+								<p> 
+                                </p>
+
+								<h2>Lessons Learned</h2>
+
+                                <h1><a href="https://github.com/ayerun/SLAM_From_Scratch" target="_blank">-View Full Source Code-</a></h1>
+							</section>
+
+					</div>
+
+				<!-- Copyright -->
+					<div id="copyright">
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
