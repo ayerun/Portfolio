@@ -54,49 +54,62 @@
 								<header class="major">
 									<span class="date">April 2021 - December 2021</span>
 									<h1>Virtual Reality Haptics</h1>
-                                    <p>Created a haptic feedback system for the Valve Index</p>
+                                    <p>Created a wearable haptic feedback system for VR, and used with a virtual drum kit to demonstrate its functionality and benefits.
+									</p>
                                 </header>
                                 
                                 <div class="image main"><img src="images/SLAM/apollo.jpg" alt="" style="max-width: 80%"/></div>
                                 
 								<h2>Overview</h2>
-								<p> This project is an exploration of force/torque feedback in human-robotic systems. 
-									VR prides itself on creating immersive environments. 
-									However, in current systems the immersion is only an audio-visual experience. 
-									Adding the sense of touch to VR systems can enable many more applications such as telerobotic surgery and something else.
-									VR haptic gloves are the first expansion into the tactile domain.
+								<p> This project is an exploration in designing and programming robotic systems for VR haptic feedback. 
+									The main selling point of VR is the immersion. 
+									However in current systems, the immersion is only an audio-visual experience. 
+									Integrating the sense of touch is the next step in immersion. 
+									Haptic feedback can enable more complicated applications such as telerobotic surgery and strengthen the well developed applications such as gaming.
+									VR haptic gloves were the first expansion into the tactile domain.
 									These gloves can resist finger motion.
-									This project is concerned with resisting hand and arm motion.
+									This project is concerned with resisting wrist and arm motion.
                                 </p>
 
                                 <h2>Initial Design</h2>
 								<p>In this project, we worked backwards from the end goal.
-									Our goal was to deliver force/torque feedback to user's arm.
+									Our goal was to deliver force/torque feedback to user's wrist and arm.
 									We began by thinking about mechanical systems to could produce significant force/torques on the user's arms. 
-									Our plan was to use motor(s) to generate torque and use a linkage system to convert the torque into a force or torque felt on the user's hand.
-									The best way to visualize this is by imagining a robotic arm in which the user is holding the end effector.
+									Our plan was to use motor(s) to generate torque and use a linkage to convert the torque into a force or torque felt by the user.
+									The best way to visualize this is by imagining a robotic arm in which the user is holding the end effector (Figure 1).
 									Actuating the motors in the robotic arm, will extert torques/forces on the user's hand.
 									If this robotic arm is stationary in the room, the VR experience is confined to the arm's workspace.
 									If the robotic arm is attached to the user, the VR experience if fully mobile.
 									There are two main complications to this design.
 									The user must carry the weight of the robot, and 
 									the user's body must disperse the reaction forces (the base of the robot will exert forces on the user).
-									
+								</p>
+								<center>
+									<a href="images/Haptics/theoretical_device_full_body.png" target="_blank">
+										<img class="image fit" src="images/Haptics/theoretical_device_full_body.png" alt="" style="width: 20%; height: 20%;"/>
+									</a>
+								</center>
+								<div class="align center">
+									<p class="image center"><b>Figure 1.</b> Rendering of the theoretical device initially designed. 
+										Motors in the linkage could be actuated to exert torques/forces on the user's wrist and arm. 
+									</p>
+								</div><br/>
+								<p>	
 									From a software and controls standpoint, the primary constraint is the VR tracking frequency.
 									The maximum stiffness of a haptically rendered surface is proportional to the speed of the controller.
 									The Valve Index 2, comes with a state of the art tracking system, Lighthouse 2.0. 
 									This tracking system provides data at 144 Hz.
 									The following is the primary question I researched during this project.
-									Given a tracking frequency of 144 Hz, what surfaces can we haptically render?
+									Given a tracking frequency of 144 Hz, what surfaces can be haptically render?
 									The answer to this question is based in both engineering and human psychology.
 								</p>
 								<h2>Materials</h2>
                                 <h4>Hardware Selection</h4>
                                 <p> For this project, I am using a Valve Index 2 with the Vive Lighthouse 2.0 tracking system. 
-									I chose this setup because the Lighthouse 2.0 provides the fastest tracking on the market.
+									I chose this setup because the Lighthouse 2.0 provides the fastest VR tracking system.
 									The other primary components I needed are motors, encoders, and a motor driver.
 									I decided to use the T-motor GL60 Kv25. I chose this motor for the following reasons. 
-									It has a Kv of 25 rpm/V so it can deliver high torque. 
+									It has a Kv of 25 \(\frac{rpm}{V}\), so it can deliver high torque. 
 									It has a has 14 pole pairs, so rotation will be smooth. This is necessary to create compelling haptics.
 									It has a stall current of 4.2 A. This will prevent the motor from overheating quickly.
 									It weighs 230g which is reasonable for the heaviest component of the wearable device. 
@@ -125,7 +138,7 @@
 								<a href="images/Haptics/low_level_haptics_pipeline.png" target="_blank"><img class="image fit" src="images/Haptics/low_level_haptics_pipeline.png" alt="" /></a><br/>
 								<div class="align center">
 									<p class="image center"><b>Figure 1.</b> General software architecture.
-										The C++ application inputs the controller pose and encoder data. 
+										The application inputs the controller pose and encoder data. 
 										The haptic model determines the torque that should be applied to the motor.
 										The desired torque is sent to the ODrive.
 										The ODrive directly controls the motor.
@@ -209,7 +222,7 @@
 									x is the depth of the cursor into the floor squared  [\(m^2\)]<br/><br/>
 									This equation allowed me to express the spring constant in traditional units.
 								</p>
-								<!-- gif a instability before filtering -->
+								<!-- gif of instability before filtering -->
 
 								<h4>Filtering</h4>
 								<p>Due to the noise in the tracking data, I decided to filter the controller pose. 
@@ -231,7 +244,7 @@
 									This wearable allows the user the move the controller in 3D space and rotate about a single axis (4 degrees of freedom).
 									The user can rotate about the other two axes by moving their body about the controller. 
 								</p>
-								<!-- pic or arm brace -->
+								<!-- pic of arm brace -->
 
 								<h4>Linkage</h4>
 								<p>A notable feature of the haptic device, is the four bar linkage that attaches the motor to the VR controller. 
@@ -285,7 +298,7 @@
 									For example, if you hit the drum as hard as you can directly at the center point, the drum sound is loud and sustains for a long time.
 									I implemented a simple communication protocol and utilized a TCP port to send data from the C++ application to the drum synthesizer.
                                 </p>
-
+								<!-- drumming videos -->
 								<h2>Conclusion & Next Steps</h2>
 								<p>This project is a succesful first step into VR haptics beyond the fingertips.
 									Going back to the initial research question, "Given a tracking frequency of 144 Hz, what surfaces can be haptically render?"
@@ -307,6 +320,14 @@
 									When designing full arm haptic devices, it would be best to apply the force from a distance. 
 									In this case, another part of your body such as your hip could bear the weight of the heavy components as your arm receives the force feedback.
 									Moving forward, I no longer have access to the hardware necessary for this project, but hopefully this post provides insights for future developers. 
+								</p>
+
+								<h2>Acknowledgements</h2>
+								<p><b>Bill Strong</b> came up with the initial ideas that started this project.
+									He also helped during every step of this project.
+									The majority of mechanical design demonstrated throughout this project is his work.<br/><br/>
+									<b>Matthew Elwin</b> gave guidance and insights throughout this project. 
+									Specifically, he helped me and Bill stay focused on the primary goal. 
 								</p>
 
                                 <h1><a href="https://github.com/ayerun/SLAM_From_Scratch" target="_blank">-View Full Source Code-</a></h1>
