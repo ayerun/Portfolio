@@ -85,7 +85,7 @@
 									From a software and controls standpoint, the primary constraint is the VR tracking frequency.
 									The maximum stiffness of a haptically rendered surface is proportional to the speed of the controller.
 									The Valve Index 2, comes with a state of the art tracking system, lighthouse 2. 
-									This tracking system provides data at 140 Hz.
+									This tracking system provides data at 144 Hz.
 									The following is the primary question I researched during this project.
 									Given this bottleneck frequency, what surfaces can we haptically render?
 									The answer to this question is based in both engineering and human psychology.
@@ -95,8 +95,15 @@
                                 <p> For this project, I am using a Valve Index 2 with the Vive Lighthouse 2.0 tracking system. 
 									I chose this setup because the Lighthouse 2.0 provides the fastest tracking on the market.
 									The other primary components I needed are motors, encoders, and a motor driver.
-									I started by searching for motors.
-
+									I decided to use the T-motor GL60 Kv25. I chose this motor for the following reasons. 
+									It has a Kv of 25 rpm/V so it can deliver high torque. 
+									It has a has 14 pole pairs, so rotation will be smooth. This is necessary to create compelling haptics.
+									It has a stall current of 4.2 A. This will prevent the motor from overheating quickly.
+									It weighs 230g which is reasonable for the heaviest component of the wearable device. 
+									For the motor driver, I decided to use the ODrive. 
+									This motor driver is open-source, so it can be modified if needed. 
+									Also, the ODrive implements field oriented control to smoothly control the motor and create compelling haptics. 
+									The encoder I chose is the AS5048A. This encoder has 14-bit resolution and is supported by the ODrive.
                                 </p>
 								<h4>Software Selection</h4>
                                 <p> It was difficult to select the software to use for this project.
@@ -105,29 +112,117 @@
 									I settled on using Linux for the following reasons. 
 									This project is primarily a robotic technology exploration not a VR technology exploration.
 									The robotics side of this project will be easier to build upon in the future if this foundation is built Linux.
-									Once the technology is no longer experimental, it will be trivial to port to Windows. 
+									Once the technology is no longer experimental, it can be ported Windows. 
 									The downside to using Linux, is that it is difficult to interact with the VR hardware.
-									Unity, the game engine, runs on Linux. However, the OpenXR plugin needed to interface with the headset depends on DirectX which is Windows exclusive. 
-									SteamVR runs on Linux, but the amount of bugs I encountered almost made me quit robotics all together.
-									I decided to keep hardware interaction at the bear minimum because VR hardware on Linux is so unreliable.
-									I repurposed an OpenXR example render pipeline for my own use.
-									This project focuses on the sense of touch, so for now I am not rendering anything to the VR headset. 
-									I am only using the VR setup and render pipeline for the controller tracking data.
-									The OpenXR API is for C++, so for simplicity and ease of use I did everything in C++.
+									Currently popular game engines, Unity and Unreal Engine, do not support VR development in Linux.
+									I decided to use the OpenXR API directly to interact with the hardware. 
+									I stripped down an OpenXR example render pipeline for my own use.
+									This project focuses on the sense of touch, so for now I am not rendering to the VR headset. 
+									I am only using the VR setup and render pipeline to access the controller tracking data.
 								</p>
 
 								<h2>Pipeline</h2>
+								<a href="images/Haptics/low_level_haptics_pipeline.png" target="_blank"><img class="image fit" src="images/Haptics/low_level_haptics_pipeline.png" alt="" /></a><br/>
+								<div class="align center">
+									<p class="image center"><b>Figure 1.</b> General software architecture.
+										The C++ application inputs the controller pose and encoder data. 
+										The haptic model determines the torque that should be applied to the motor.
+										The desired torque is sent to the ODrive.
+										The ODrive directly controls the motor.
+									</p>
+								</div><br/>
+								<h4>VR Input</h4>
+								<p>The Lighthouse 2.0 samples controller and headset data at 144Hz. 
+									The SteamVR runtime converts the data from the Lighthouse into meaningful information.
+									The OpenXR program collects both controller poses as well as the headset pose, but I am only using a single controller pose. <br/><br/>
+									<b>Note on SteamVR Runtime:</b> This is currently the only runtime that can interact with the Lighthouse 2.0. 
+									SteamVR is closed source, and their developement practices (specifically for Linux) are questionable. 
+									For this project, I am using SteamVR version 1.15.12. Also, I disabled SteamVR from connecting to the internet.
+									This is the only way to prevent auto updates. 
+									I recommend using Monado, an open-source runtime, when Lighthouse 2.0 is supported.
+								</p>
+
+								<h4>C++ Application</h4>
+								<p><b>OpenXR Program</b><br/>
+									This part of my application was derived from the hello_xr OpenXR example. 
+									I simplified this code to only the portions needed for this project. 
+									I also added functionality to query the state of the program and retreive necessary information such as controller pose.<br/>
+									<b>Haptic Model</b><br/>
+									The haptic model uses the controller pose and encoder data to calculate the torque that should be applied to the motor. 
+									The code is structured to make the haptic model easily modifiable. 
+									This allows developers to easily experiment when attempting to render various surfaces and textures.<br/>
+									<b>Motor Communication</b><br/>
+									The ODrive comes with a Python-based CLI that serially communicates with the motor driver. 
+									Since my application requires C++ for OpenXR, I implemented a motor communication library in C++ enabling direct communication with the ODrive.
+								</p>
+
+								<h4>Motor Control</h4>
+								<p>After the C++ application sends a desired torque to the ODrive, the ODrive's control algorithms should handle the direct motor control. 
+									However, I had to modify the hardware and software on the ODrive to enable the torque control mode.
+									The ODrive firmware classifies motors into two categories, high current motors and low current motors. 
+									The T-Motor GL60 Kv25 is classified as a low current motor. 
+									The ODrive does not implement torque control for low current motors because it can overheat the ODrive and/or the motor. 
+									To work around this, I replaced the standard shunt resistors on the ODrive with 0.02Ω resistors. 
+									I also modified the shunt resistance value in the firmware to reflect this change.
+								</p>
 
 								<h2>1 Degree of Freedom</h2>
+								<p>Since this project is novel in the domain of VR haptics, I started with a single degree of freedom system. 
+									There were two goals during this stage of the project. The first was to implement the software pipeline previous mentioned.
+									The second goal was to assess the ability to haptically render surfaces using encoder data and using VR tracking data. 
+									The plan was to haptically render a wall using the model of a spring. Hooke's Law states: $$F_s = -kx$$
+									\(F_s\) is the spring force [N]<br/>
+									k is the spring constant [N/m]<br/>
+									x is the displacement [m]<br/><br/>
+									My system only produces torque, so I modified the equation.
+									$$T_m = -k&theta;$$
+									\(T_m\) is the motor torque [Nm]<br/>
+									k is the spring constant [\(\frac{Nm}{degrees}\)]<br/>
+									\(&theta;\) is the displacement [degrees]<br/><br/>
+								</p>
 								<h4>Encoder Feedback</h4>
+								<p>The C++ application received encoder data at a frequency of 490 Hz. 
+									Using only the encoder feedback I was able to render walls up to a stiffness of ... before instability occurred
+								</p>
+								<!-- gif of encoder feedback stability and instability -->
+								
 								<h4>Tracking Feedback</h4>
-								<p> 
+								<p> The C++ application received VR controller pose data at a frequency of 144 Hz.
+									Using only the pose data, I was able to render walls up to a stiffness of ... before instability occurred </p>
                                 </p>
+								<!-- gif of tracking feedback stability and instability -->
 
                                 <h2>2 Degrees of Freedom</h2>
-								<h4>Encoder Feedback</h4>
-								<h4>Tracking Feedback</h4>
+								<p>The 1 degree of freedom system confirmed that compelling haptics are feasible given the bottleneck frequency of 144 Hz. 
+									The next step was to incorporate more freedom of movement. 
+									I put the 1 degree of freedom system on a vertical slider to make a 2 degree of freedom system.
+									Haptics in the 2 degree of freedom system cannot be done with just the encoder. 
+									The VR tracking data is necessary to determine the position of the controller.
+									The VR tracking data or the encoder data could be used to determine the angle of the controller. 
+									In this system, I decided to haptically render a floor. 
+									You can imagine the VR controller as a sword (extending past the top of the physical controller), and the sword tip (cursor) is interacting with the floor.
+									As the cursor touches the floor, the motor delivers a torque to the user that attempts to prevent the sword from penetrating the floor.
+									I used the following equation to model the floor: 
+									$$T_m = -kx$$
+									\(T_m\) is the motor torque [Nm]<br/>
+									k is the spring constant [\(\frac{N}{m}\)]<br/>
+									x is the depth of the cursor into the floor squared  [\(m^2\)]<br/><br/>
+									This equation allowed me to express the spring constant in traditional units.
+								</p>
+								<!-- gif a instability before filtering -->
+
 								<h4>Filtering</h4>
+								<p>Due to the noise in the tracking data, I decided to filter the controller pose. 
+									I used the following exponential smoothing function to lowpass filter the controller position:
+									$$s_0 = x_0$$
+									$$s_n = &alpha;x_n+(1-&alpha;)s_{n-1}$$
+									s is the filtered output<br/>
+									x is the unfiltered input<br/>
+									\(&alpha;\) is the smoothing factor<br/><br/>
+									I experimentally and qualitatively determined \(&alpha;=0.5\) to be the optimal smoothing factor. 
+								</p>
+								<!-- gif of stability after filtering  -->
+
 								<h4>Audio pipeline</h4>
 								<p>
                                 </p>
