@@ -52,7 +52,7 @@
 						<!-- Post -->
 							<section class="post">
 								<header class="major">
-									<span class="date">March 2021 - December 2021</span>
+									<span class="date">April 2021 - December 2021</span>
 									<h1>Virtual Reality Haptics</h1>
                                     <p>Created a haptic feedback system for the Valve Index</p>
                                 </header>
@@ -84,10 +84,10 @@
 									
 									From a software and controls standpoint, the primary constraint is the VR tracking frequency.
 									The maximum stiffness of a haptically rendered surface is proportional to the speed of the controller.
-									The Valve Index 2, comes with a state of the art tracking system, lighthouse 2. 
+									The Valve Index 2, comes with a state of the art tracking system, Lighthouse 2.0. 
 									This tracking system provides data at 144 Hz.
 									The following is the primary question I researched during this project.
-									Given this bottleneck frequency, what surfaces can we haptically render?
+									Given a tracking frequency of 144 Hz, what surfaces can we haptically render?
 									The answer to this question is based in both engineering and human psychology.
 								</p>
 								<h2>Materials</h2>
@@ -185,7 +185,7 @@
 									Using only the encoder feedback I was able to render walls up to a stiffness of ... before instability occurred
 								</p>
 								<!-- gif of encoder feedback stability and instability -->
-								
+
 								<h4>Tracking Feedback</h4>
 								<p> The C++ application received VR controller pose data at a frequency of 144 Hz.
 									Using only the pose data, I was able to render walls up to a stiffness of ... before instability occurred </p>
@@ -223,23 +223,91 @@
 								</p>
 								<!-- gif of stability after filtering  -->
 
-								<h4>Audio pipeline</h4>
-								<p>
-                                </p>
+                                <h2>6 Degrees of Freedom</h2>
+								<p>The next step was to detach the controller from the vertical rail. 
+									In order to do this, the system needed to become a wearable. 
+									My advisor, Bill Strong, designed and manufactured an arm brace for haptic feedback. 
+									The arm brace disperses motor reaction forces through the user's forearm.
+									This wearable allows the user the move the controller in 3D space and rotate about a single axis (4 degrees of freedom).
+									The user can rotate about the other two axes by moving their body about the controller. 
+								</p>
+								<!-- pic or arm brace -->
 
-                                <h2>4 Degrees of Freedom</h2>
 								<h4>Linkage</h4>
-								<h4>Transforms</h4>
-								<p> 
+								<p>A notable feature of the haptic device, is the four bar linkage that attaches the motor to the VR controller. 
+									This linkage provides room for the controller to move vertically without rotating the motor. 
+									However, controller rotation requires motor rotation and vice versa.
+									Therefore, the haptic controls are not significantly affected.
+									The lever arm between the motor and controller is longer, so the user feels slightly less torque.
+									But, the longer lever arm mimics the human body because the motor is alligned with the user's wrist.
+									This linkage makes the wearable feel comfortable and natural even though the user can only easily utilize 4 of the typical 6 degrees of freedoms.
+								</p>
+								<!-- gif of linkage -->
+
+								<h4>Initial Tests</h4>
+								<!-- 6 dof gif no drum -->
+								<p>The software for 2 degree of freedom could be used for the new 6 degree of freedom system, if you make two simplifications. 
+									One, the floor has infinite length and width. 
+									Two, do not rotate the controller about the axis in line with your arm.
+									This allowed me to test the wearable without modifying the software. 
+									When using the haptic device, it felt almost exactly like a drum.
+									I decided to focus on making a virtual drumming demonstration with haptics.
+									Haptics projects are difficult to portray in videos, so hopefully the example of a drum to help the viewers of this post potentially understand the feeling of the device and some of its applications.
+								</p>
+
+								<h4>Drumkit Haptic Model</h4>
+								<p>After testing the haptic device, I started to modify the software to fully utilize all 6 degrees of freedom.
+									In the 2 degree of freedom system, tracking the cursor (or drumstick tip) was simple trigonometry.
+									All you needed to know was the controller height and angle.
+									In the 6 degree of freedom system, tracking the cursor is more complicated. 
+									I set up transformation matricies to define a world frame and track the controller and cursor frames.
+									I defined the world frame using the initial controller pose when the program starts. 
+									The controller is then tracked in reference to the world frame. 
+									The cursor is defined as a static transformation from the controller frame. 
+									Therefore, the controller and cursor move together.
+									The final step was to define drum surfaces.
+									I created a drum object in C++.
+									The rectangular volume of each drum is defined using a center coordinate (x,y,z), a lenth, and a width.
+									The surface starts at the center z coordinated, and extends downward infinitely.
+									Each drum surface has an associated spring constant to simulate different drums.
+									The drum objects also contain methods and parameters that are used for drum systhesis.
                                 </p>
 
-                                <h2>Next Steps</h2>
-								<h4>Concurrency</h4>
-								<h4>4 Bar Linkage</h4>
-								<p> 
+								<h4>Drum Synthesis</h4>
+								<p>In order to make a virtual drum demonstration, I needed to synthesize a drum sound.
+									To do this, I used Pure Data. 
+									Pure Data is an open-source visual programming language that specializes in audio digitial signal processing.
+									In Pure Data, I took used samples of various drums and played the sample everytime the cursor contacted the drum. 
+									To make the synthesizer more realistic, I multiplied the sampled drum sound with an ADSR (attack, decay, sustain, release) envelope.
+									I used parameters from my application to modify the envelope.
+									The cursor velocity is used to amplify the drum sound.
+									The cursor/drum contact point determins the sustain of the drum sound.
+									For example, if you hit the drum as hard as you can directly at the center point, the drum sound is loud and sustains for a long time.
+									I implemented a simple communication protocol and utilized a TCP port to send data from the C++ application to the drum synthesizer.
                                 </p>
 
-								<h2>Lessons Learned</h2>
+								<h2>Conclusion & Next Steps</h2>
+								<p>This project is a succesful first step into VR haptics beyond the fingertips.
+									Going back to the initial research question, "Given a tracking frequency of 144 Hz, what surfaces can be haptically render?"
+									For wrist haptics, there are many possibilites for haptic rendering at this frequency.
+									In my opinion, the controller instability became noticeable at stiffness values greater than 700 \(\frac{N}{m}\).
+									At this stiffness, a virtual wall feel realistic to the cautious user.
+									Rendering a wall in the headset could discourage users from testing the stiffness of the wall.
+									While 700 \(\frac{N}{m}\) is the max stiffness I achieved, there are methods that could potential increase the stiffness.
+									One feature I did not get to implement is concurrency in the system.
+									The application can receive data from the encoder at 490 Hz, but in my implementation the frequency is capped at 144 Hz because of the render loop.
+									By obtaining encoder data in a separate thread, the controller tracking frequency can be aftifically increased via sensor fusion.
+									Damping makes surfaces feel less elastic, if that is the desired effect. 
+									In my experimentation, the cursor velocity needs aggressive filtering for a compelling damping effect.
+									Textures are also possible. For example, the act of drawing the blinds exerts small forces on your wrist that can be simulated.
+								</p>
+								<p>This project also provided insights on how to proceed for full arm haptic feedback.
+									One thing I learned from the arm brace, is that bearing the weight of a robotic arm with is not feasible.
+									The arm brace is comfortable, but the weight of the brace alone becomes a nuisance after 10-15 minutes. 
+									When designing full arm haptic devices, it would be best to apply the force from a distance. 
+									In this case, another part of your body such as your hip could bear the weight of the heavy components as your arm receives the force feedback.
+									Moving forward, I no longer have access to the hardware necessary for this project, but hopefully this post provides insights for future developers. 
+								</p>
 
                                 <h1><a href="https://github.com/ayerun/SLAM_From_Scratch" target="_blank">-View Full Source Code-</a></h1>
 							</section>
