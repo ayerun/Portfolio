@@ -280,7 +280,7 @@
 									The VR tracking data or the encoder data could be used to determine the angle of the controller. 
 									In this system, I decided to haptically render a ceiling. 
 									You can imagine the VR controller as a drumstick (extending past the top of the physical controller), and the drumstick tip (cursor) is interacting with the ceiling.
-									As the cursor touches the ceiling, the motor delivers a torque to the user that attempts to prevent the drumstick from penetrating the ceiling.
+									As the cursor touches the ceiling, the motor delivers a torque that prevents the drumstick from penetrating the ceiling.
 									I used the following equation to model the ceiling: 
 									$$T_m = -kx$$
 									\(T_m\) is the motor torque [Nm]<br/>
@@ -309,7 +309,7 @@
 									However, controller rotation requires motor rotation and vice versa.
 									Therefore, the haptic controls are not significantly affected.
 									The lever arm between the motor and controller is longer, so the user feels slightly less torque.
-									But, the longer lever arm mimics the human body because the motor is alligned with the user's wrist.
+									But, the longer lever alligns the motor with the user's wrist.
 									This linkage makes the wearable feel comfortable and natural even though the user can only easily utilize 4 of the typical 6 degrees of freedoms.
 								</p>
 								<center>
@@ -328,7 +328,7 @@
 									This allowed me to test the wearable without significantly modifying the software. 
 									When using the haptic device, it felt almost exactly like a drum.
 									I decided to focus on making a virtual drumming demonstration with haptics.
-									Haptics projects are difficult to portray in videos, so hopefully the example of a drum to help the viewers of this post potentially understand the feeling of the device and some of its applications.
+									Haptics projects are difficult to portray in videos, so hopefully the example of a drum will help the viewers of this post potentially understand the feeling of the device and some of its applications.
 								</p>
 								<center>
 									<a href="images/Haptics/6dof.gif" target="_blank"><img class="image fit" src="images/Haptics/6dof.gif" alt="" style="width: 70%; height: 70%;"/></a>
@@ -353,19 +353,20 @@
 									I created a 
 									<a href="https://github.com/ayerun/VR_Haptics/blob/master/include/haptics/haptics.hpp#L60" target="_blank">drum object</a> in C++.
 									The rectangular volume of each drum is defined using a center coordinate (x,y,z), a lenth, and a width.
-									The surface starts at the center z coordinated, and extends downward infinitely.
+									The surface starts at the center z coordinate, and extends downward infinitely.
 									Each drum surface has an associated spring constant to simulate different drums.
 									The drum objects also contain methods and parameters that are used for drum systhesis.
                                 </p>
 
 								<h4>Drum Synthesis</h4>
 								<p>In order to make a virtual drum demonstration, I needed to synthesize a drum sound.
-									To do this, I used Pure Data. 
+									To do this, I used 
+									<a href="https://puredata.info/" target="_blank"></a>Pure Data</a>. 
 									Pure Data is an open-source visual programming language that specializes in audio digitial signal processing.
 									In Pure Data, I used samples of various drums and played the sample everytime the cursor contacted the drum. 
 									To make the sound more realistic, I multiplied the sampled drum sound with an ADSR (attack, decay, sustain, release) envelope.
 									I used parameters from my application to modify the envelope.
-									The cursor velocity is used to amplify the drum sound.
+									The cursor velocity amplifies the drum sound.
 									The cursor/drum contact point determines the sustain of the drum sound.
 									For example, if you hit the drum as hard as you can directly at the center point, the drum sound is loud and sustains for a long time.
 									I implemented a communication protocol and utilized a TCP port to send data from the C++ application to the drum synthesizer.
@@ -382,16 +383,16 @@
 								</style><br/>
 								
 								<h2>Conclusion & Next Steps</h2>
-								<p>This project is a succesful first step into VR haptics beyond the fingertips.
+								<p>This project is a succesful step into VR haptics beyond the fingertips.
 									Going back to the initial research question, "Given a tracking frequency of 144 Hz, what surfaces can be haptically render?"
 									For wrist haptics, there are many possibilites for haptic rendering at this frequency.
-									In my opinion, the controller instability became noticeable at stiffness values greater than 700 \(\frac{N}{m}\).
-									At this stiffness, a virtual wall feel realistic to the cautious user.
+									In my opinion, the controller instability became noticeable at stiffness values greater than 800 \(\frac{N}{m}\).
+									At this stiffness, a virtual wall feels realistic to the cautious user.
 									Rendering a wall in the headset could discourage users from testing the stiffness of the wall.
-									While 700 \(\frac{N}{m}\) is the max stiffness I achieved, there are methods that could potential increase the stiffness.
+									While 800 \(\frac{N}{m}\) is the max stiffness I achieved, there are methods that could potential increase the stiffness.
 									One feature I did not get to implement is concurrency in the system.
 									The application can receive data from the encoder at 490 Hz, but in my implementation the frequency is capped at 144 Hz because of the render loop.
-									By obtaining encoder data in a separate thread, the controller tracking frequency can be aftifically increased via sensor fusion.
+									By obtaining encoder data in a separate thread, the controller tracking frequency can be artifically increased via sensor fusion.
 									Damping makes surfaces feel less elastic, if that is the desired effect. 
 									In my experimentation, the cursor velocity needs aggressive filtering for a compelling damping effect.
 									Textures are also possible. For example, the act of drawing the blinds exerts small forces on your wrist that can be simulated.
