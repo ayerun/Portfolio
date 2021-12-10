@@ -54,13 +54,22 @@
 								<header class="major">
 									<span class="date">April 2021 - December 2021</span>
 									<h1>Virtual Reality Haptics</h1>
-                                    <p>Created a wearable haptic device for Virtual Reality. 
+                                    <p>Created a wearable haptic device for virtual reality. 
 										Demonstrated device by creating a virtual drumkit.
 									</p>
                                 </header>
                                 
-                                <div class="image main"><img src="images/Haptics/Vr-haptics.jpg" alt="" style="max-width: 70%"/></div>
-                                
+								<!-- <div class="image main"><img src="images/Haptics/Vr-haptics.jpg" alt="" style="max-width: 70%"/></div> -->
+								<div class="iframe-container">
+									<iframe width="840" height="473" src="https://www.youtube.com/embed/YNHY9Q2XsnI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+								</div>
+								<style>
+									.iframe-container {
+										  text-align:center;
+											width:100%;
+									}
+								</style><br/>
+									
 								<h2>Overview</h2>
 								<p> This project is an exploration in designing and programming robotic systems for VR haptic feedback. 
 									The main selling point of VR is the immersion. 
@@ -258,8 +267,6 @@
 									</p>
 								</div>
 								</center><br/>
-								<!-- gif of stability after filtering  -->
-								<!-- gif of tracking stability -->
 
                                 <h2>2 Degrees of Freedom</h2>
 								<p>The 1 degree of freedom system confirmed that compelling haptics are feasible. 
@@ -269,8 +276,8 @@
 									The VR tracking data is necessary to determine the position of the controller.
 									The VR tracking data or the encoder data could be used to determine the angle of the controller. 
 									In this system, I decided to haptically render a floor. 
-									You can imagine the VR controller as a sword (extending past the top of the physical controller), and the sword tip (cursor) is interacting with the ceiling.
-									As the cursor touches the ceiling, the motor delivers a torque to the user that attempts to prevent the sword from penetrating the ceiling.
+									You can imagine the VR controller as a drumstick (extending past the top of the physical controller), and the drumstick tip (cursor) is interacting with the ceiling.
+									As the cursor touches the ceiling, the motor delivers a torque to the user that attempts to prevent the drumstick from penetrating the ceiling.
 									I used the following equation to model the ceiling: 
 									$$T_m = -kx$$
 									\(T_m\) is the motor torque [Nm]<br/>
@@ -278,17 +285,20 @@
 									x is the depth of the cursor into the ceiling squared  [\(m^2\)]<br/><br/>
 									This equation allowed me to express the spring constant in traditional units.
 								</p>
-								<!-- gif of instability before filtering -->
-
+								<center>
+								<a href="images/Haptics/2dof.gif" target="_blank"><img class="image fit" src="images/Haptics/2dof.gif" alt="" style="width: 70%; height: 70%;"/></a>
+								<div class="align center">
+									<p class="image center"><b>Figure 5.</b> Rendered ceiling with stiffness 700 \(\frac{N}{m}\) using a combination of filtered tracking feedback and encoder feedback.
+									</p>
+								</div>
+								</center><br/>
                                 <h2>6 Degrees of Freedom</h2>
 								<p>The next step was to detach the controller from the vertical rail. 
 									In order to do this, the system needed to become a wearable. 
 									My advisor, Bill Strong, designed and manufactured an arm brace for haptic feedback. 
 									The arm brace disperses motor reaction forces through the user's forearm.
-									This wearable allows the user the move the controller in 3D space and rotate about a single axis (4 degrees of freedom).
-									The user can rotate about the other two axes by moving their body about the controller. 
+									This wearable allows the user the move and orient the controller in 3D space.
 								</p>
-								<!-- pic of arm brace -->
 
 								<h4>Linkage</h4>
 								<p>A notable feature of the haptic device, is the four bar linkage that attaches the motor to the VR controller. 
@@ -299,18 +309,32 @@
 									But, the longer lever arm mimics the human body because the motor is alligned with the user's wrist.
 									This linkage makes the wearable feel comfortable and natural even though the user can only easily utilize 4 of the typical 6 degrees of freedoms.
 								</p>
-								<!-- gif of linkage -->
+								<center>
+									<a href="images/Haptics/linkage.gif" target="_blank"><img class="image fit" src="images/Haptics/linkage.gif" alt="" style="width: 70%; height: 70%;"/></a>
+									<div class="align center">
+										<p class="image center"><b>Figure 6.</b> Wearable haptic device that can exert a torque about the axis through the user's wrist.
+										</p>
+									</div>
+								</center><br/>
 
 								<h4>Initial Tests</h4>
-								<!-- 6 dof gif no drum -->
-								<p>The software for 2 degree of freedom could be used for the new 6 degree of freedom system, if you make two simplifications. 
-									One, the floor has infinite length and width. 
-									Two, do not rotate the controller about the axis in line with your arm.
-									This allowed me to test the wearable without modifying the software. 
+								<p>The software for 2 degree of freedom could be used for the new 6 degree of freedom system with minor changes and constraints.
+									First I changed the haptically rendered ceiling to a haptically rendered floor. 
+									I assumed the floor has infinite length and width. 
+									I did not rotate the controller about the axis in line with my arm.
+									This allowed me to test the wearable without significantly modifying the software. 
 									When using the haptic device, it felt almost exactly like a drum.
 									I decided to focus on making a virtual drumming demonstration with haptics.
 									Haptics projects are difficult to portray in videos, so hopefully the example of a drum to help the viewers of this post potentially understand the feeling of the device and some of its applications.
 								</p>
+								<center>
+									<a href="images/Haptics/6dof.gif" target="_blank"><img class="image fit" src="images/Haptics/6dof.gif" alt="" style="width: 70%; height: 70%;"/></a>
+									<div class="align center">
+										<p class="image center"><b>Figure 7.</b> Initial tests of the haptic device. 
+											The haptic model transferred from the 2 degree of freedom system made the suface feel like a drum
+										</p>
+									</div>
+								</center><br/>
 
 								<h4>Drumkit Haptic Model</h4>
 								<p>After testing the haptic device, I started to modify the software to fully utilize all 6 degrees of freedom.
@@ -334,15 +358,25 @@
 								<p>In order to make a virtual drum demonstration, I needed to synthesize a drum sound.
 									To do this, I used Pure Data. 
 									Pure Data is an open-source visual programming language that specializes in audio digitial signal processing.
-									In Pure Data, I took used samples of various drums and played the sample everytime the cursor contacted the drum. 
-									To make the synthesizer more realistic, I multiplied the sampled drum sound with an ADSR (attack, decay, sustain, release) envelope.
+									In Pure Data, I used samples of various drums and played the sample everytime the cursor contacted the drum. 
+									To make the sound more realistic, I multiplied the sampled drum sound with an ADSR (attack, decay, sustain, release) envelope.
 									I used parameters from my application to modify the envelope.
 									The cursor velocity is used to amplify the drum sound.
-									The cursor/drum contact point determins the sustain of the drum sound.
+									The cursor/drum contact point determines the sustain of the drum sound.
 									For example, if you hit the drum as hard as you can directly at the center point, the drum sound is loud and sustains for a long time.
-									I implemented a simple communication protocol and utilized a TCP port to send data from the C++ application to the drum synthesizer.
-                                </p>
-								<!-- drumming videos -->
+									I implemented a communication protocol and utilized a TCP port to send data from the C++ application to the drum synthesizer.
+								</p>
+								
+								<div class="iframe-container">
+									<iframe width="840" height="473" src="https://youtube.com/embed/hchN2K1E7TA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+								</div>
+								<style>
+									.iframe-container {
+										  text-align:center;
+											width:100%;
+									}
+								</style><br/>
+								
 								<h2>Conclusion & Next Steps</h2>
 								<p>This project is a succesful first step into VR haptics beyond the fingertips.
 									Going back to the initial research question, "Given a tracking frequency of 144 Hz, what surfaces can be haptically render?"
@@ -358,9 +392,9 @@
 									In my experimentation, the cursor velocity needs aggressive filtering for a compelling damping effect.
 									Textures are also possible. For example, the act of drawing the blinds exerts small forces on your wrist that can be simulated.
 								</p>
-								<p>This project also provided insights on how to proceed for full arm haptic feedback.
+								<p>This project provided insights on how to proceed for full arm haptic feedback.
 									One thing I learned from the arm brace, is that bearing the weight of a robotic arm with is not feasible.
-									The arm brace is comfortable, but the weight of the brace alone becomes a nuisance after 10-15 minutes. 
+									The arm brace is comfortable, but the weight of the brace becomes a nuisance after 10-15 minutes. 
 									When designing full arm haptic devices, it would be best to apply the force from a distance. 
 									In this case, another part of your body such as your hip could bear the weight of the heavy components as your arm receives the force feedback.
 									Moving forward, I no longer have access to the hardware necessary for this project, but hopefully this post provides insights for future developers. 
