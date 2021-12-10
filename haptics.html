@@ -190,7 +190,9 @@
 									This allows developers to easily experiment when attempting to render various surfaces and textures.<br/>
 									<b>Motor Communication</b><br/>
 									The ODrive comes with a Python-based CLI that serially communicates with the motor driver. 
-									Since my application requires C++ for OpenXR, I implemented a motor communication library in C++ enabling direct communication with the ODrive.
+									Since my application requires C++ for OpenXR, I implemented a 
+									<a href="https://github.com/ayerun/VR_Haptics/blob/master/include/haptics/motor_communication.hpp" target="_blank">motor communication library</a>  
+									in C++ enabling direct communication with the ODrive.
 								</p>
 
 								<h4>Motor Control</h4>
@@ -347,7 +349,8 @@
 									The cursor is defined as a static transformation from the controller frame. 
 									Therefore, the controller and cursor move together.
 									The final step was to define drum surfaces.
-									I created a drum object in C++.
+									I created a 
+									<a href="https://github.com/ayerun/VR_Haptics/blob/master/include/haptics/haptics.hpp#L60" target="_blank">drum object</a> in C++.
 									The rectangular volume of each drum is defined using a center coordinate (x,y,z), a lenth, and a width.
 									The surface starts at the center z coordinated, and extends downward infinitely.
 									Each drum surface has an associated spring constant to simulate different drums.
@@ -408,7 +411,7 @@
 									Specifically, he helped me and Bill stay focused on the primary goal. 
 								</p>
 
-                                <h1><a href="https://github.com/ayerun/SLAM_From_Scratch" target="_blank">-View Full Source Code-</a></h1>
+                                <h1><a href="https://github.com/ayerun/VR_Haptics" target="_blank">-View Full Source Code-</a></h1>
 							</section>
 
 					</div>
