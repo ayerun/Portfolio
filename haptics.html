@@ -393,7 +393,8 @@
 									One feature I did not get to implement is concurrency in the system.
 									The application can receive data from the encoder at 490 Hz, but in my implementation the frequency is capped at 144 Hz because of the render loop.
 									By obtaining encoder data in a separate thread, the controller tracking frequency can be artifically increased via sensor fusion.
-									Damping makes surfaces feel less elastic, if that is the desired effect. 
+									The spring model was ideal for a drum, but the equation could be changed for different effects. 
+									Damping makes surfaces feel less elastic. 
 									In my experimentation, the cursor velocity needs aggressive filtering for a compelling damping effect.
 									Textures are also possible. For example, the act of drawing the blinds exerts small forces on your wrist that can be simulated.
 								</p>
